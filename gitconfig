@@ -1,0 +1,18 @@
+[user]
+    name=Wallysson Oliveira
+    email=wallyssonryu@gmail.com
+
+[credential]
+    helper=!pass-git-helper
+
+[fetch]
+    prune=true
+
+[init]
+    defaultBranch=main
+
+[pull]
+    rebase=true
+    
+[protocol "file"]
+	allow = always
