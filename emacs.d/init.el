@@ -655,8 +655,10 @@ folder, otherwise delete a word"
 	 ("browser" (or
 		     (name . "brave")
 		     (name . "qutebrowser")))
+	 ("git" (mode . magit-mode))
 	 ("elisp" (mode . emacs-lisp-mode))
 	 ("org" (mode . org-mode))
+	 ("python" (mode . python-mode))
 	 ("shell" (or
 		   (mode . ansi-term-mode)
 		   (mode . eshell-mode)
