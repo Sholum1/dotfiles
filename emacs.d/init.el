@@ -221,6 +221,7 @@
                     (fun (cdr arg)))
 		(exwm-input-set-key (kbd key) fun)))
 	    i))
+
   ;; Don't let ediff break EXWM, keep it in one frame
   (setq ediff-diff-options "-w"
 	ediff-split-window-function 'split-window-horizontally
@@ -655,7 +656,6 @@ folder, otherwise delete a word"
 	 ("browser" (or
 		     (name . "brave")
 		     (name . "qutebrowser")))
-	 ("git" (mode . magit-mode))
 	 ("elisp" (mode . emacs-lisp-mode))
 	 ("org" (mode . org-mode))
 	 ("python" (mode . python-mode))
@@ -665,6 +665,7 @@ folder, otherwise delete a word"
 		   (mode . term-mode)
 	  	   (mode . shell-mode)))
 	 ("exwm" (mode . exwm-mode))
+	 ("git" (name . "^magit"))
 	 ("emacs" (name . "^[*].+[*]$"))))
       ibuffer-show-empty-filter-groups nil)
 

@@ -16,3 +16,5 @@
     
 [protocol "file"]
 	allow = always
+[github]
+	user = sholum1
