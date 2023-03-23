@@ -414,16 +414,6 @@ folder, otherwise delete a word"
   :demand t
   :hook (embark-collect-mode . consult-preview-at-point-mode))
 
-;; Jumping with Avy
-(use-package avy
-  :commands (avy-goto-char avy-goto-word-0 avy-goto-line)
-  :custom
-  (leader-key-def
-    "j"   '(:ignore t :which-key "jump")
-    "jj"  '(avy-goto-char :which-key "jump to char")
-    "jw"  '(avy-goto-word-0 :which-key "jump to word")
-    "jl"  '(avy-goto-line :which-key "jump to line")))
-
 ;; Change theme / White space mode
 (leader-key-def
   "t"  '(:ignore t :which-key "toggles")
@@ -565,11 +555,6 @@ folder, otherwise delete a word"
   :defer 1
   :config
   (default-text-scale-mode))
-  ;; Window selection
-(use-package ace-window
-  :bind (("M-o" . ace-window))
-  :config
-  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
 
   ;; Window history
 (winner-mode)
@@ -834,7 +819,7 @@ folder, otherwise delete a word"
   ;; Visual Commands
 (with-eval-after-load 'esh-opt
  (setq eshell-destroy-buffer-when-process-dies t)
- (setq eshell-visual-commands '("git" "gh" "pass" "emacs")))
+ (setq eshell-visual-commands '("pass" "emacs")))
 
 ;; Stop Async Shell commands from split the window
 (add-to-list 'display-buffer-alist
@@ -908,12 +893,13 @@ folder, otherwise delete a word"
 ;; Using git in Emacs
 
   ;; Magit
- (use-package magit
-   :custom
-   magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
+  (use-package magit
+    :custom
+    magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
 
  ;; Make Magit more powerful with Forge
- (use-package forge)
+  (use-package forge
+    :after magit)
 
  ;; Showing todos in Magit
  (use-package magit-todos)
