@@ -1,3 +1,5 @@
-*daviwilconfig.org
 emacs.d/elpa/
-config/qutebrowser/bookmarks/
+config/qutebrowser/*
+!config/qutebrowser/config.py
+!config/qutebrowser/autoconfig.yml
+/emacs.d/Configuration examples.org
