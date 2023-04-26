@@ -119,8 +119,8 @@
 
   ;; Launch apps that will run in the background
   (defun run-in-background (command)
-    (let ((command-parts (split-string command "[ ]+")))
-      (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
+	      (let ((command-parts (split-string command "[ ]+")))
+		(apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
 
   (run-in-background "pasystray")
   (run-in-background "nm-applet")
@@ -128,6 +128,7 @@
   (run-in-background "caffeine")
   (run-in-background "redshift -O 3800 -P -r")
   (run-in-background "kdeconnect-cli")
+  (run-in-background "xbanish")
 
 (defun exwm-init-hook ()
   ;; Make workspace 0 be the one where we land at startup
@@ -730,10 +731,10 @@ folder, otherwise delete a word"
 
   ;; Org bullets
   (use-package org-bullets
-  :after org
-  :hook (org-mode . org-bullets-mode)
-  :custom
-  (org-bullets-bullet-list '("◉" "○")))
+    :after org
+    :hook (org-mode . org-bullets-mode)
+    :custom
+    (org-bullets-bullet-list '("◉" "○")))
 
   ;; Key bindings
   (evil-define-key '(normal insert visual) org-mode-map (kbd "C-j") 'org-next-visible-heading)
@@ -742,13 +743,13 @@ folder, otherwise delete a word"
   (evil-define-key '(normal insert visual) org-mode-map (kbd "M-k") 'org-metaup))
 
   (use-package evil-org
-  :after org
-  :hook ((org-mode . evil-org-mode)
-         (org-agenda-mode . evil-org-mode)
-         (evil-org-mode . (lambda () (evil-org-set-key-theme '(navigation todo insert textobjects additional)))))
-  :config
-  (require 'evil-org-agenda)
-  (evil-org-agenda-set-keys))
+    :after org
+    :hook ((org-mode . evil-org-mode)
+           (org-agenda-mode . evil-org-mode)
+           (evil-org-mode . (lambda () (evil-org-set-key-theme '(navigation todo insert textobjects additional)))))
+    :config
+    (require 'evil-org-agenda)
+    (evil-org-agenda-set-keys))
 
 (leader-key-def
   "o"   '(:ignore t :which-key "org")
@@ -761,8 +762,14 @@ folder, otherwise delete a word"
   "oe"  '(org-export-dispatch t :which-key "export"))
 
   ;; Literate Calculations in Org Mode
-(use-package literate-calc-mode
-  :hook (org-mode . literate-calc-minor-mode))
+  (use-package literate-calc-mode
+    :hook (org-mode . literate-calc-minor-mode))
+
+
+;; Reveal.js configuration
+(use-package org-re-reveal
+  :config
+  (setq org-re-reveal-root "file:///home/sholum/.reveal.js/"))
 
 ;; Darkroom configuration
 (use-package darkroom
@@ -908,3 +915,11 @@ folder, otherwise delete a word"
  (use-package git-link
    :config
    (setq git-link-open-in-browser t))
+
+;; Better spell checking with jinx
+(use-package jinx
+  :hook (emacs-startup . global-jinx-mode)
+  :bind ([remap ispell-word] . jinx-correct))
+
+;; Language Server Protocol (Eglot) configuration
+(use-package eglot)
