@@ -32,9 +32,9 @@
       mouse-wheel-progressive-speed nil 	   ; don't accelerate scrolling
       mouse-wheel-follow-mouse 't 		   ; scroll window under mouse
       scroll-step 1				   ; scroll one line at time
-      scroll-margin 5)				   ; set the margin to fiv lines
+      scroll-margin 5)				   ; set the margin to five lines
 
-;; Set frame tansparency and maximize windows by default
+;; Set frame transparency and maximize windows by default
 (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
   (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
 (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
@@ -101,13 +101,13 @@
 ;; Disable line numbers for some modes
 (require 'display-line-numbers)
 (defcustom display-line-numbers-exempt-modes '(vterm-mode eshell-mode shell-mode term-mode ansi-term-mode pdf-view-mode doc-view-mode which-key-mode telega-chat-mode telega-root-mode)
-  "Major modes on which to disable the linum mode, exempts them from global requirement"
+  "Major modes on which to disable the linum mode, exempts them from global requirement."
   :group 'display-line-numbers
   :type 'list
   :version "green")
 
 (defun display-line-numbers--turn-on ()
-  "turn on line numbers but excempting certain majore modes defined in `display-line-numbers-exempt-modes'"
+  "Turn on line numbers but except certain major modes defined in `display-line-numbers-exempt-modes'."
   (if (and
        (not (member major-mode display-line-numbers-exempt-modes))
        (not (minibufferp)))
@@ -131,7 +131,7 @@
   (run-in-background "xbanish")
 
 (defun exwm-init-hook ()
-  ;; Make workspace 0 be the one where we land at startup
+  "Make workspace 0 be the one where we land at startup."
   (exwm-workspace-switch-create 0))
 
 (defun exwm-update-class ()
@@ -193,7 +193,7 @@
   (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
 
   ;; Set up global key bindings. These always work, no matter the input state!
-  ;; Keep in mind that changing this list after EXWM initializs has no effect.
+  ;; Keep in mind that changing this list after EXWM initialize has no effect.
   (setq exwm-input-global-keys
 	`(
 	  ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
@@ -345,8 +345,7 @@
 
 ;; Completions with Vertico
 (defun minibuffer-backward-kill (arg)
-  "When minibuffer is completing a file name delete up to parent
-folder, otherwise delete a word"
+  "When minibuffer is completing a file name delete up to parent folder, otherwise delete a word."
   (interactive "p")
   (if minibuffer-completing-file-name
       (if (string-match-p "/." (minibuffer-contents))
@@ -381,7 +380,9 @@ folder, otherwise delete a word"
   "ci"	'(consult-imenu :which-key "imenu")
   "cg"  '(consult-grep :which-key "grep")
   "cl"  '(consult-goto-line :which-key "goto line")
-  "cf"  '(consult-locate :which-key "locate"))
+  "cf"  '(consult-locate :which-key "locate")
+  "cm"	'(evil-collection-consult-mark :which-key "mark history")
+  "ce"	'(consult-flycheck :which-key "flymake"))
 
 ;; Improved Candidate Filtering with Orderless
 (use-package orderless
@@ -449,10 +450,9 @@ folder, otherwise delete a word"
   :hook (org-mode))
 
 ;; Flycheck configuration
-(use-package flycheck
-  :defer t
-  :hook
-  (org-mode . flycheck-mode))
+(use-package flycheck)
+(use-package consult-flycheck)
+(global-flycheck-mode)
 
 ;; TRAMP
   ;; Set default connection mode to SSH
@@ -613,7 +613,7 @@ folder, otherwise delete a word"
 
 ;; Solves the technical issues of Pcomplete
 ;; (extracted from the Corfu github page: 'https://github.com/minad/corfu')
-;; The advices are only needed on Emacs 28 and older.
+;; The advice are only needed on Emacs 28 and older.
 (when (< emacs-major-version 29)
   ;; Silence the pcomplete capf, no errors or messages!
   (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-silent)
@@ -754,8 +754,6 @@ folder, otherwise delete a word"
 (leader-key-def
   "o"   '(:ignore t :which-key "org")
   "om"  '(org-mode :which-key "mode")
-  "oi"  '(:ignore t :which-key "insert")
-  "oil" '(org-insert-link :which-key "insert link")
   "on"  '(org-toggle-narrow-to-subtree :which-key "toggle narrow")
   "oa"  '(org-agenda :which-key "agenda")
   "oc"  '(org-capture t :which-key "capture")
@@ -801,6 +799,10 @@ folder, otherwise delete a word"
   :ensure nil
   :init
   (evil-collection-eshell-setup))
+
+(defun eshell-instance ()
+  (interactive)
+  (eshell 'N))
 
   ;; Fish Completions
 (use-package fish-completion
@@ -866,7 +868,7 @@ folder, otherwise delete a word"
 ;; "Shell" modes mode
 (leader-key-def
   "s"	'(:ignore t :which-key "shells")
-  "se"	'(eshell :which-key "eshell")
+  "se"	'(eshell-instance :which-key "eshell")
   "ss"	'(shell :which-key "shell"))
 
 ;; KDE Connect
@@ -923,3 +925,4 @@ folder, otherwise delete a word"
 
 ;; Language Server Protocol (Eglot) configuration
 (use-package eglot)
+
