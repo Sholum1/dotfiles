@@ -652,6 +652,9 @@
 	  	   (mode . shell-mode)))
 	 ("exwm" (mode . exwm-mode))
 	 ("git" (name . "^magit"))
+	 ("telegram" (or
+		     (mode . telega-chat-mode)
+	             (mode . telega-root-mode)))
 	 ("emacs" (name . "^[*].+[*]$"))))
       ibuffer-show-empty-filter-groups nil)
 
@@ -841,11 +844,12 @@
   (setq tracking-frame-bahavior nil))
 
 ;; Telegram
-;;(use-package telega
-;;  :commands telega
-;;  :config
-;;  (setq telega-use-tracking-for '(any pin unread)))
-;;(telega-notifications-mode 1)
+(use-package telega
+  :commands (telega)
+  :defer t
+  :config
+  (setq telega-use-tracking-for '(any pin unread)))
+(telega-notifications-mode 1)
 
 ;; Dunst
 (defun history-pop ()
@@ -924,5 +928,6 @@
   :bind ([remap ispell-word] . jinx-correct))
 
 ;; Language Server Protocol (Eglot) configuration
-(use-package eglot)
-
+(use-package eglot
+  :config
+  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
