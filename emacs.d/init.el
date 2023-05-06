@@ -841,11 +841,12 @@
   (setq tracking-frame-bahavior nil))
 
 ;; Telegram
-;;(use-package telega
-;;  :commands telega
-;;  :config
-;;  (setq telega-use-tracking-for '(any pin unread)))
-;;(telega-notifications-mode 1)
+(use-package telega
+  :commands (telega)
+  :defer t
+  :config
+  (setq telega-use-tracking-for '(any pin unread)))
+(telega-notifications-mode 1)
 
 ;; Dunst
 (defun history-pop ()
