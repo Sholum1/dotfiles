@@ -847,12 +847,12 @@
 (use-package telega
   :commands (telega)
 <<<<<<< HEAD
+  :defer t)
+=======
   :defer t
   :config
   (setq telega-use-tracking-for '(any pin unread)))
-=======
-  :defer t)
->>>>>>> origin/main
+>>>>>>> 9be3acd (Start using telega)
 (telega-notifications-mode 1)
 
 ;; Dunst
