@@ -846,9 +846,7 @@
 ;; Telegram
 (use-package telega
   :commands (telega)
-  :defer t
-  :config
-  (setq telega-use-tracking-for '(any pin unread)))
+  :defer t)
 (telega-notifications-mode 1)
 
 ;; Dunst
