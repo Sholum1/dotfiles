@@ -652,6 +652,9 @@
 	  	   (mode . shell-mode)))
 	 ("exwm" (mode . exwm-mode))
 	 ("git" (name . "^magit"))
+	 ("telegram" (or
+		     (mode . telega-chat-mode)
+	             (mode . telega-root-mode)))
 	 ("emacs" (name . "^[*].+[*]$"))))
       ibuffer-show-empty-filter-groups nil)
 
@@ -923,5 +926,6 @@
   :bind ([remap ispell-word] . jinx-correct))
 
 ;; Language Server Protocol (Eglot) configuration
-(use-package eglot)
-
+(use-package eglot
+  :config
+  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
