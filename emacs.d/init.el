@@ -846,19 +846,9 @@
 ;; Telegram
 (use-package telega
   :commands (telega)
-<<<<<<< HEAD
-<<<<<<< HEAD
-  :defer t)
-=======
   :defer t
   :config
   (setq telega-use-tracking-for '(any pin unread)))
->>>>>>> 9be3acd (Start using telega)
-=======
-  :defer t
-  :config
-  (setq telega-use-tracking-for '(any pin unread)))
->>>>>>> 4b31751 (fixup! Start using telega)
 (telega-notifications-mode 1)
 
 ;; Dunst
