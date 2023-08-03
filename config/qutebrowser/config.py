@@ -240,7 +240,7 @@ c.colors.webpage.preferred_color_scheme = 'dark'
 # `colors.webpage.darkmode.threshold.background` to 205.  - "With
 # selective inversion of everything": Combines the two variants   above.
 # Type: Bool
-c.colors.webpage.darkmode.enabled = False
+c.colors.webpage.darkmode.enabled = True
 
 # Map keys to other keys, so that they are equivalent in all modes. When
 # the key used as dictionary-key is pressed, the binding for the key

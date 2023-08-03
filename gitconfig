@@ -3,16 +3,17 @@
 	email = wallyssonryu@gmail.com
 
 [credential]
-    helper=!pass-git-helper
+    # helper = !pass-git-helper $@
+    helper = store
 
 [fetch]
-    prune=true
+    prune = true
 
 [init]
-    defaultBranch=main
+    defaultBranch = main
 
 [pull]
-    rebase=true
+    rebase = true
     
 [protocol "file"]
 	allow = always

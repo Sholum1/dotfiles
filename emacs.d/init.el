@@ -68,10 +68,6 @@
 (load-theme 'Sholum t)
 
 ;; Use-package configuration
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
-(require 'use-package)
-(require 'use-package-ensure)
 (setq use-package-always-ensure t)
 
 ;; Set up the visible bell
@@ -163,7 +159,8 @@
   ;; Set the screen resolution
   (require 'exwm-randr)
   (exwm-randr-enable)
-  (start-process-shell-command "xrandr" nil "xrandr --output VGA1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output VIRTUAL1 --off")
+  (start-process-shell-command "xrandr" nil "xrandr --output eDP1 --primary --mode 1920x1080 --pos 0x1080 --rotate normal --output DP1 --off --output HDMI1 --off --output HDMI2 --mode 1920x1080 --pos 0x0 --rotate normal --output VIRTUAL1 --off")
+  (setq exwm-randr-workspace-output-plist '(3 "HDMI2" 4 "HDMI2" 5 "HDMI2"))
 
   ;; Set the wallpaper
   (defun set-wallpaper ()
@@ -231,6 +228,7 @@
   ;; Enable exwm
   (exwm-enable))
 
+
 ;; Dashboard configuration
 (use-package dashboard
   :config
@@ -255,6 +253,8 @@
      ("s-m" . desktop-environment-toggle-music)
      ("s-s" . desktop-environment-screenshot)
      ("s-S" . desktop-environment-screenshot-part)))
+  (setq desktop-environment-screenshot-command "spectacle -b -n"
+	desktop-environment-screenshot-partial-command "spectacle -r -b -n")
   :custom
   (desktop-environment-brightness-small-increment "1%+")
   (desktop-environment-brightness-small-decrement "1%-")
@@ -285,7 +285,7 @@
   :init (which-key-mode)
   :diminish which-key-mode
   :config
-  (setq which-key-idle-delay 0.3
+  (setq which-key-idle-delay 0.1
 	which-key-allow-evil-operators t))
 
   ;; ESC cancels all
@@ -382,7 +382,9 @@
   "cl"  '(consult-goto-line :which-key "goto line")
   "cf"  '(consult-locate :which-key "locate")
   "cm"	'(evil-collection-consult-mark :which-key "mark history")
-  "ce"	'(consult-flycheck :which-key "flymake"))
+  "ce"	'(:ignore t :which-key "error")
+  "cem" '(consult-flymake :which-key "flymake")
+  "cec" '(consult-flycheck :which-key "flycheck"))
 
 ;; Improved Candidate Filtering with Orderless
 (use-package orderless
@@ -449,9 +451,16 @@
   :defer t
   :hook (org-mode))
 
+;; Flymake configuration
+(use-package flymake
+  :defer t
+  :hook ((org-mode . flymake-mode)
+	 (prog-mode . flymake-mode)))
+
 ;; Flycheck configuration
 (use-package flycheck)
-(use-package consult-flycheck)
+(use-package consult-flycheck
+  :after flycheck)
 (global-flycheck-mode)
 
 ;; TRAMP
@@ -460,7 +469,11 @@
 
 ;; Commenting lines
 (use-package evil-nerd-commenter
-  :bind ("M-p" . evilnc-comment-or-uncomment-lines))
+  :bind ("M-p" . evilnc-comment-or-uncomment-lines)
+  :config (add-hook 'c-mode-common-hook
+		    (lambda ()
+		      (setq comment-start "// "
+			    comment-end ""))))
 
 (use-package ws-butler
   :hook (((text-mode . ws-butler-mode)
@@ -514,8 +527,12 @@
       " "
       mode-line-misc-info)))
 
+
   ;; Doom modeline
-(use-package all-the-icons)
+(use-package nerd-icons
+  :config
+  (setq nerd-icons-scale-factor 1.3))
+
 (use-package minions
   :hook (doom-modeline-mode . minions-mode)
   :custom
@@ -523,9 +540,9 @@
 
 (use-package doom-modeline
   :custom
-  (doom-modeline-height 20)
+  (doom-modeline-enable-word-count t)
+  (doom-modeline-height 23)
   (doom-modeline-bar-width 5)
-  (doom-modeline-lsp t)
   (doom-modeline-github nil)
   (doom-modeline-mu4e nil)
   (doom-modeline-irc nil)
@@ -581,9 +598,10 @@
 
 ;; Corfu configuration
 (use-package corfu
+  ;; :hook (corfu-mode . corfu-popupinfo-mode)
   :config
-  (setq tab-always-indent 'complete
-	corfu-popupinfo-delay t)
+  (setq corfu-popupinfo-delay t
+	tab-always-indent 'complete)
   :custom
   (corfu-auto t)
   (corfu-cycle t)
@@ -591,10 +609,10 @@
 	      ("C-j" . corfu-next)
 	      ("C-k" . corfu-previous)
 	      ("TAB" . corfu-insert)
+	      ([tab] . corfu-insert)
 	      ("M-<return>" . corfu-quit))
   :init
-  (global-corfu-mode)
-  (corfu-popupinfo-mode))
+  (global-corfu-mode))
 
 ;; Completion At Point Extensions
 (use-package cape
@@ -608,19 +626,7 @@
   (add-to-list 'completion-at-point-functions #'cape-sgml)
   (add-to-list 'completion-at-point-functions #'cape-rfc1345)
   (add-to-list 'completion-at-point-functions #'cape-abbrev)
-  (add-to-list 'completion-at-point-functions #'cape-ispell)
   (add-to-list 'completion-at-point-functions #'cape-symbol))
-
-;; Solves the technical issues of Pcomplete
-;; (extracted from the Corfu github page: 'https://github.com/minad/corfu')
-;; The advice are only needed on Emacs 28 and older.
-(when (< emacs-major-version 29)
-  ;; Silence the pcomplete capf, no errors or messages!
-  (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-silent)
-
-  ;; Ensure that pcomplete does not write to the buffer
-  ;; and behaves as a pure `completion-at-point-function'.
-  (advice-add 'pcomplete-completions-at-point :around #'cape-wrap-purify))
 
 ;; Buffers configuration
 (leader-key-def
@@ -645,6 +651,12 @@
 	 ("elisp" (mode . emacs-lisp-mode))
 	 ("org" (mode . org-mode))
 	 ("python" (mode . python-mode))
+	 ("haskell" (or
+		     (mode . haskell-mode)
+		     (mode . haskell-interactive-mode)))
+	 ("c/cpp" (or
+		    (mode . c-mode)
+		    (mode . c++-mode)))
 	 ("shell" (or
 		   (mode . ansi-term-mode)
 		   (mode . eshell-mode)
@@ -655,6 +667,9 @@
 	 ("telegram" (or
 		     (mode . telega-chat-mode)
 	             (mode . telega-root-mode)))
+	 ("don't kill" (or
+			(mode . dashboard-mode)
+			(name . "*scratch*")))
 	 ("emacs" (name . "^[*].+[*]$"))))
       ibuffer-show-empty-filter-groups nil)
 
@@ -683,6 +698,7 @@
     (dired-omit-mode 1)))
 
   ;; Dired design configuration
+(use-package all-the-icons)
 (use-package all-the-icons-dired)
 (add-hook 'dired-mode-hook
   (lambda ()
@@ -730,7 +746,8 @@
   :config
   (org-babel-do-load-languages
     'org-babel-load-languages
-    '((emacs-lisp . t)))
+    '((emacs-lisp . t)
+      (python . t)))
 
   ;; Org bullets
   (use-package org-bullets
@@ -789,7 +806,8 @@
 (use-package proced
   :commands proced
   :config
-  (setq proced-auto-update-interval 1)
+  (setq proced-auto-update-interval 1
+	proced-enable-color-flag t)
   (add-to-list 'proced-format-alist
 	       '(custom user pid ppid sess tree pcpu pmem rss start time state (args comm)))
   (setq-default proced-format 'custom)
@@ -847,9 +865,8 @@
 (use-package telega
   :commands (telega)
   :defer t
-  :config
-  (setq telega-use-tracking-for '(any pin unread)))
-(telega-notifications-mode 1)
+  :custom
+  (telega-notifications-mode 1))
 
 ;; Dunst
 (defun history-pop ()
@@ -929,5 +946,35 @@
 
 ;; Language Server Protocol (Eglot) configuration
 (use-package eglot
+  :defer t
   :config
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
+
+;; C
+(defun compile-c ()
+  (interactive)
+  (save-buffer)
+  (let ((project-dir (locate-dominating-file (buffer-file-name) "makefile")))
+    (if project-dir
+	(progn (setq default-directory project-dir)
+               (compile (format "make")))
+      (compile (format "clang '%s' -O0 -g -o '%s'" (buffer-name) (file-name-sans-extension (buffer-name)))))))
+
+(add-hook 'c-mode-hook
+	  (lambda()
+	    (define-key c-mode-map (kbd "C-c C-c") 'compile-c)))
+
+;; Haskell
+(use-package haskell-mode
+  :hook (haskell-mode . haskell-indentation-mode)
+  :config
+  (setq haskell-process-type 'ghci))
+
+(use-package ormolu
+  :hook ((haskell-mode . ormolu-format-on-save-mode)
+	 (haskell-mode . interactive-haskell-mode))
+  :bind (:map haskell-mode-map
+              ("C-c r" . ormolu-format-buffer)))
+
+(use-package hlint-refactor
+  :hook (haskell-mode . hlint-refactor-mode))
