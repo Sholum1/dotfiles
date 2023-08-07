@@ -469,11 +469,11 @@
 
 ;; Commenting lines
 (use-package evil-nerd-commenter
-  :bind ("M-p" . evilnc-comment-or-uncomment-lines)
-  :config (add-hook 'c-mode-common-hook
-		    (lambda ()
-		      (setq comment-start "// "
-			    comment-end ""))))
+  :bind ("M-p" . evilnc-comment-or-uncomment-lines))
+  (add-hook 'c-mode-common-hook
+	    (lambda ()
+	      (setq comment-start "// "
+		    comment-end "")))
 
 (use-package ws-butler
   :hook (((text-mode . ws-butler-mode)
@@ -846,10 +846,9 @@
               (setq-local corfu-auto nil)
               (corfu-mode)))
 
-  ;; Visual Commands
-(with-eval-after-load 'esh-opt
- (setq eshell-destroy-buffer-when-process-dies t)
- (setq eshell-visual-commands '("pass" "emacs")))
+  ;; Eat
+  (use-package eat)
+  (add-hook 'eshell-first-time-mode-hook #'eat-eshell-mode)
 
 ;; Stop Async Shell commands from split the window
 (add-to-list 'display-buffer-alist

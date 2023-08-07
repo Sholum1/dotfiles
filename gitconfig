@@ -3,7 +3,7 @@
 	email = wallyssonryu@gmail.com
 
 [credential]
-	helper = store
+	helper = !pass-git-helper $@
 
 [fetch]
     prune = true
