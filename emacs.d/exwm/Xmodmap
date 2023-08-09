@@ -1,6 +1,0 @@
-keycode 66 = Caps_Lock
-keycode 9 = Escape
-clear lock
-add Lock = Escape
-keycode 9 = Caps_Lock
-keycode 66 = Escape
