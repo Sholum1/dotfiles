@@ -3,7 +3,8 @@
 ;; Emacs initialization
 (setq inhibit-startup-message t 		    ; Disable the startup message
       column-number-indicator-zero-based nil        ; Column number starts at one
-      native-comp-async-report-warnings-errors nil) ; Silence Compiler warnings
+      native-comp-async-report-warnings-errors nil  ; Silence Compiler warnings
+      package-install-upgrade-built-in t)           ; Upgrade the built-in packages
 
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
