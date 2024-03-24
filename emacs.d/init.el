@@ -69,6 +69,7 @@
 (load-theme 'Sholum t)
 
 ;; Use-package configuration
+(require 'use-package-ensure)
 (setq use-package-always-ensure t)
 
 ;; Set up the visible bell
@@ -251,6 +252,10 @@
      ("s->" . desktop-environment-volume-increment-slowly)
      ("s-," . desktop-environment-volume-decrement)
      ("s-<" . desktop-environment-volume-decrement-slowly)
+     ("s-p" . desktop-environment-brightness-increment)
+     ("s-P" . desktop-environment-brightness-increment-slowly)
+     ("s-o" . desktop-environment-brightness-decrement)
+     ("s-O" . desktop-environment-brightness-decrement-slowly)
      ("s-m" . desktop-environment-toggle-music)
      ("s-s" . desktop-environment-screenshot)
      ("s-S" . desktop-environment-screenshot-part)))
@@ -626,8 +631,7 @@
   (add-to-list 'completion-at-point-functions #'cape-tex)
   (add-to-list 'completion-at-point-functions #'cape-sgml)
   (add-to-list 'completion-at-point-functions #'cape-rfc1345)
-  (add-to-list 'completion-at-point-functions #'cape-abbrev)
-  (add-to-list 'completion-at-point-functions #'cape-symbol))
+  (add-to-list 'completion-at-point-functions #'cape-abbrev))
 
 ;; Buffers configuration
 (leader-key-def
@@ -949,6 +953,7 @@
   :defer t
   :config
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
+(eglot-ensure)
 
 ;; C
 (defun compile-c ()
@@ -978,3 +983,7 @@
 
 (use-package hlint-refactor
   :hook (haskell-mode . hlint-refactor-mode))
+
+;; Java
+(use-package eglot-java
+  :hook (eglot-java-mode . java-mode))
