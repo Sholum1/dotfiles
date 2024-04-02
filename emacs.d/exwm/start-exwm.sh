@@ -7,7 +7,7 @@ xmodmap ~/.Xmodmap
 # Run the screen compositor
 picom &
 
-# Enable the screen compositor
+# Enable the screen locker
 xss-lock -- slock &
 
 # Fire it up
