@@ -1,4 +1,6 @@
 emacs.d/elpa/
+emacs.d/url/
+emacs.d/recentf/
 config/qutebrowser/*
 !config/qutebrowser/config.py
 !config/qutebrowser/autoconfig.yml

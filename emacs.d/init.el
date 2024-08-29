@@ -113,20 +113,8 @@
 
 (global-display-line-numbers-mode)
 
+
 ;; EXWM configuration
-
-  ;; Launch apps that will run in the background
-  (defun run-in-background (command)
-	      (let ((command-parts (split-string command "[ ]+")))
-		(apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
-
-  (run-in-background "pasystray")
-  (run-in-background "nm-applet")
-  (run-in-background "dunst")
-  (run-in-background "caffeine")
-  (run-in-background "redshift -O 3800 -P -r")
-  (run-in-background "kdeconnect-cli")
-  (run-in-background "xbanish")
 
 (defun exwm-init-hook ()
   "Make workspace 0 be the one where we land at startup."
@@ -160,20 +148,21 @@
 
   ;; Set the screen resolution
   (require 'exwm-randr)
+  (setq exwm-randr-workspace-output-plist '(3 "HDMI-2" 4 "HDMI-2" 5 "HDMI-2"))
+  (start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output DP-1 --off --output HDMI-1 --off --output HDMI-2 --mode 1920x1080 --pos 1920x0 --rotate normal")
+  ;; (start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output DP-1 --off --output HDMI-1 --off --output HDMI-2 --mode 1920x1080 --pos 1920x0 --rotate normal")
+
   (exwm-randr-enable)
-  (start-process-shell-command "xrandr" nil "xrandr --output eDP1 --primary --mode 1920x1080 --pos 0x1080 --rotate normal --output DP1 --off --output HDMI1 --off --output HDMI2 --mode 1920x1080 --pos 0x0 --rotate normal --output VIRTUAL1 --off")
-  (setq exwm-randr-workspace-output-plist '(3 "HDMI2" 4 "HDMI2" 5 "HDMI2"))
+
+  ;; Systemtray
+  (require 'exwm-systemtray)
+  (exwm-systemtray-enable)
 
   ;; Set the wallpaper
   (defun set-wallpaper ()
     (interactive)
     (start-process-shell-command "feh" nil "feh --bg-scale ~/Downloads/.Wallpaper.jpg"))
   (set-wallpaper)
-
-  ;; System-tray configuration
-  (require 'exwm-systemtray)
-  (setq exwm-systemtray-height 16)
-  (exwm-systemtray-enable)
 
   ;; These keys should always pass through to Emacs
   (setq exwm-input-prefix-keys
@@ -230,6 +219,18 @@
   ;; Enable exwm
   (exwm-enable))
 
+  ;; Launch apps that will run in the background
+  (defun run-in-background (command)
+    (let ((command-parts (split-string command "[ ]+")))
+      (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
+
+  (run-in-background "pasystray")
+  (run-in-background "nm-applet")
+  (run-in-background "dunst")
+  (run-in-background "caffeine")
+  (run-in-background "redshift -O 3800 -P -r")
+  (run-in-background "kdeconnect-cli")
+  (run-in-background "xbanish")
 
 ;; Dashboard configuration
 (use-package dashboard
@@ -257,6 +258,7 @@
      ("s-o" . desktop-environment-brightness-decrement)
      ("s-O" . desktop-environment-brightness-decrement-slowly)
      ("s-m" . desktop-environment-toggle-music)
+     ("s-M" . desktop-environment-toggle-mute)
      ("s-s" . desktop-environment-screenshot)
      ("s-S" . desktop-environment-screenshot-part)))
   (setq desktop-environment-screenshot-command "spectacle -b -n"
@@ -656,6 +658,7 @@
 	 ("elisp" (mode . emacs-lisp-mode))
 	 ("org" (mode . org-mode))
 	 ("python" (mode . python-mode))
+	 ("java" (mode . java-mode))
 	 ("haskell" (or
 		     (mode . haskell-mode)
 		     (mode . haskell-interactive-mode)))
@@ -935,9 +938,6 @@
   (use-package forge
     :after magit)
 
- ;; Showing todos in Magit
- (use-package magit-todos)
-
  ;; Opening Git files externally
  (use-package git-link
    :config
@@ -949,13 +949,35 @@
   :bind ([remap ispell-word] . jinx-correct))
 
 ;; Language Server Protocol (Eglot) configuration
+(defun activate-eglot-organize-file ()
+  (interactive)
+  (when (and (eglot--current-project))
+    (add-hook 'before-save-hook 'eglot-code-action-organize-imports nil t)
+    (add-hook 'before-save-hook 'eglot-format-buffer nil t))
+  (message "Eglot will format the file on save"))
+
+
+(defun deactivate-eglot-organize-file ()
+  (interactive)
+  (when (and (eglot--current-project))
+    (remove-hook 'before-save-hook 'eglot-code-action-organize-imports t)
+    (remove-hook 'before-save-hook 'eglot-format-buffer t))
+  (message "Eglot will not format the file on save"))
+
 (use-package eglot
   :defer t
   :config
+  (add-hook 'c-mode-hook 'eglot-ensure)
+  (add-hook 'haskell-mode-hook 'eglot-ensure)
+  (add-hook 'python-mode-hook 'eglot-ensure)
+  (add-hook 'eglot-managed-mode-hook #'activate-eglot-organize-file)
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
 (eglot-ensure)
 
-;; C
+(define-key eglot-mode-map (kbd "C-c o") 'activate-eglot-organize-file)
+(define-key eglot-mode-map (kbd "C-c d") 'deactivate-eglot-organize-file)
+
+;; C configuration
 (defun compile-c ()
   (interactive)
   (save-buffer)
@@ -965,21 +987,30 @@
                (compile (format "make")))
       (compile (format "clang '%s' -O0 -g -o '%s'" (buffer-name) (file-name-sans-extension (buffer-name)))))))
 
+(defun compile-riscv ()
+  (interactive)
+  (save-buffer)
+  (compile (format "clang --target=riscv32 -march=rv32g -mabi=ilp32d -mno-relax '%s' -S -o '%s.s'"
+		   (buffer-name) (file-name-sans-extension (buffer-name)))))
+
 (add-hook 'c-mode-hook
 	  (lambda()
-	    (define-key c-mode-map (kbd "C-c C-c") 'compile-c)))
+	    (define-key c-mode-map (kbd "C-c C-c") 'compile-c)
+	    (define-key c-mode-map (kbd "C-c C-v") 'compile-riscv)))
 
 ;; Haskell
 (use-package haskell-mode
-  :hook (haskell-mode . haskell-indentation-mode)
+  :hook ((haskell-mode . haskell-indentation-mode)
+	 (haskell-mode . interactive-haskell-mode))
   :config
   (setq haskell-process-type 'ghci))
 
-(use-package ormolu
-  :hook ((haskell-mode . ormolu-format-on-save-mode)
-	 (haskell-mode . interactive-haskell-mode))
-  :bind (:map haskell-mode-map
-              ("C-c r" . ormolu-format-buffer)))
+;; If I need someday
+;; (use-package ormolu
+;;   :hook ((haskell-mode . ormolu-format-on-save-mode)
+;; 	 (haskell-mode . interactive-haskell-mode))
+;;   :bind (:map haskell-mode-map
+;;               ("C-c r" . ormolu-format-buffer)))
 
 (use-package hlint-refactor
   :hook (haskell-mode . hlint-refactor-mode))
