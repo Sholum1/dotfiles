@@ -435,13 +435,19 @@
 ;; Highlight Matching Braces
 (use-package paren
   :config
-  (set-face-attribute 'show-paren-match-expression nil :background "#363e4a")
+  (set-face-attribute 'show-paren-match-expression nil :background "#36454f")
   (show-paren-mode 1))
 
 ;; Smart Parens
 (use-package smartparens
-  :hook ((prog-mode . smartparens-mode)
-         (org-mode . smartparens-mode)))
+  :hook (prog-mode org-mode)
+  :config
+  (require 'smartparens-config)
+  (sp-use-paredit-bindings)
+  (sp-pair "\"" "\"" :wrap "M-\"")
+  (sp-pair "'" "'" :wrap "M-'")
+  (sp-with-modes '(cc-mode c-ts-mode)
+      (sp-local-pair  " " " " :wrap "M-SPC")))
 
 ;; Pinentry
 (use-package pinentry
@@ -466,7 +472,9 @@
 	 (prog-mode . flymake-mode)))
 
 ;; Flycheck configuration
-(use-package flycheck)
+(use-package flycheck
+  :config (setq-default flycheck-disabled-checkers '(haskell-stack-ghc)))
+
 (use-package consult-flycheck
   :after flycheck)
 (global-flycheck-mode)
@@ -475,14 +483,7 @@
   ;; Set default connection mode to SSH
 (setq tramp-default-method "ssh")
 
-;; Commenting lines
-(use-package evil-nerd-commenter
-  :bind ("M-p" . evilnc-comment-or-uncomment-lines))
-  (add-hook 'c-mode-common-hook
-	    (lambda ()
-	      (setq comment-start "// "
-		    comment-end "")))
-
+;;
 (use-package ws-butler
   :hook (((text-mode . ws-butler-mode)
          (prog-mode . ws-butler-mode)
@@ -659,6 +660,9 @@
 	 ("org" (mode . org-mode))
 	 ("python" (mode . python-mode))
 	 ("java" (mode . java-mode))
+	 ("lisp" (or
+		  (mode . common-lisp-mode)
+		  (mode . lisp-mode)))
 	 ("haskell" (or
 		     (mode . haskell-mode)
 		     (mode . haskell-interactive-mode)))
@@ -683,8 +687,8 @@
 
 ;; Expand region configuration
 (use-package expand-region
-  :bind (("M-[" . er/expand-region)
-         ("M-{" . er/mark-outside-pairs)))
+  :bind (("s-[" . er/expand-region)
+	 ("s-{" . er/mark-outside-pairs)))
 
 ;; Dired configuration
   ;; Omit-mode
@@ -1018,3 +1022,17 @@
 ;; Java
 (use-package eglot-java
   :hook (eglot-java-mode . java-mode))
+
+;; Give emacs the ENV from Shell
+(use-package exec-path-from-shell)
+(exec-path-from-shell-initialize)
+
+;; Common Lisp
+(use-package sly
+  :hook ((common-lisp-mode . sly-mode)
+	 (lisp.mode . sly-mode))
+  :config (add-hook 'sly-mode-hook
+          (lambda ()
+            (unless (sly-connected-p)
+              (save-excursion (sly)))))
+  (setq inferior-lisp-program "/usr/bin/sbcl"))

@@ -1,7 +1,7 @@
 emacs.d/elpa/
 emacs.d/url/
 emacs.d/recentf/
+/emacs.d/Configuration examples.org
 config/qutebrowser/*
 !config/qutebrowser/config.py
 !config/qutebrowser/autoconfig.yml
-/emacs.d/Configuration examples.org
