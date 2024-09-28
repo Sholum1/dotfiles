@@ -37,9 +37,9 @@
 
 ;; Set frame transparency and maximize windows by default
 (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
-  (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
+(add-to-list 'default-frame-alist '(alpha . (90 . 90)))
 (set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-  (add-to-list 'default-frame-alist '(fullscreen . maximized))
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
 
 ;; Keep transient cruft out of ~/.emacs.d/
 (setq user-emacs-directory "~/.cache/emacs/"
@@ -63,7 +63,7 @@
 			 ("nongnu-elpa" . "https://elpa.nongnu.org/nongnu/")))
 (package-initialize)
 (unless package-archive-contents
- (package-refresh-contents))
+  (package-refresh-contents))
 
 ;; Emacs theme
 (load-theme 'Sholum t)
@@ -313,7 +313,6 @@
   :init
   (setq evil-want-integration t
 	evil-want-keybinding nil
-	evil-want-C-u-scroll t
 	evil-want-C-i-jump t
 	evil-respect-visual-line-mode t
 	evil-move-beyond-eol t)
@@ -960,7 +959,6 @@
     (add-hook 'before-save-hook 'eglot-format-buffer nil t))
   (message "Eglot will format the file on save"))
 
-
 (defun deactivate-eglot-organize-file ()
   (interactive)
   (when (and (eglot--current-project))
@@ -1009,13 +1007,6 @@
   :config
   (setq haskell-process-type 'ghci))
 
-;; If I need someday
-;; (use-package ormolu
-;;   :hook ((haskell-mode . ormolu-format-on-save-mode)
-;; 	 (haskell-mode . interactive-haskell-mode))
-;;   :bind (:map haskell-mode-map
-;;               ("C-c r" . ormolu-format-buffer)))
-
 (use-package hlint-refactor
   :hook (haskell-mode . hlint-refactor-mode))
 
@@ -1036,3 +1027,23 @@
             (unless (sly-connected-p)
               (save-excursion (sly)))))
   (setq inferior-lisp-program "/usr/bin/sbcl"))
+
+;; Move Text
+(use-package drag-stuff
+  :bind
+  (("C-S-k" . drag-stuff-up))
+  ("C-S-j" . drag-stuff-down)
+  :config (drag-stuff-global-mode t))
+
+;; Prolog
+(use-package sweeprolog
+  :hook prolog-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.pl\\'" . sweeprolog-mode))
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs
+		 '(sweeprolog-mode . ("swipl"
+				      "-g" "use_module(library(lsp_server))."
+				      "-g" "lsp_server:main"
+				      "-t" "halt"
+				      "--" "stdio")))))
