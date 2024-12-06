@@ -445,8 +445,10 @@
   (sp-use-paredit-bindings)
   (sp-pair "\"" "\"" :wrap "M-\"")
   (sp-pair "'" "'" :wrap "M-'")
-  (sp-with-modes '(cc-mode c-ts-mode)
-      (sp-local-pair  " " " " :wrap "M-SPC")))
+  (sp-pair "[" "]" :wrap "M-[")
+  (sp-pair "{" "}" :wrap "M-{")
+  (sp-with-modes '(c-mode c-ts-mode c++-mode c++-ts-mode)
+    (sp-local-pair  " " " " :wrap "M-SPC" :actions '(wrap))))
 
 ;; Pinentry
 (use-package pinentry
@@ -620,7 +622,9 @@
 	      ([tab] . corfu-insert)
 	      ("M-<return>" . corfu-quit))
   :init
-  (global-corfu-mode))
+  (global-corfu-mode)
+  :config
+  (keymap-unset corfu-map "RET"))
 
 ;; Completion At Point Extensions
 (use-package cape
@@ -651,37 +655,40 @@
 (add-hook 'ibuffer-mode-hook (lambda () (ibuffer-auto-mode 1) (ibuffer-switch-to-saved-filter-groups "default")))
 (setq ibuffer-saved-filter-groups
       '(("default"
-	 ("dired" (mode . dired-mode))
-	 ("browser" (or
-		     (name . "brave")
-		     (name . "qutebrowser")))
-	 ("elisp" (mode . emacs-lisp-mode))
-	 ("org" (mode . org-mode))
-	 ("python" (mode . python-mode))
-	 ("java" (mode . java-mode))
-	 ("lisp" (or
-		  (mode . common-lisp-mode)
-		  (mode . lisp-mode)))
-	 ("haskell" (or
-		     (mode . haskell-mode)
-		     (mode . haskell-interactive-mode)))
-	 ("c/cpp" (or
-		    (mode . c-mode)
-		    (mode . c++-mode)))
-	 ("shell" (or
-		   (mode . ansi-term-mode)
-		   (mode . eshell-mode)
-		   (mode . term-mode)
-	  	   (mode . shell-mode)))
-	 ("exwm" (mode . exwm-mode))
-	 ("git" (name . "^magit"))
-	 ("telegram" (or
-		     (mode . telega-chat-mode)
-	             (mode . telega-root-mode)))
-	 ("don't kill" (or
-			(mode . dashboard-mode)
-			(name . "*scratch*")))
-	 ("emacs" (name . "^[*].+[*]$"))))
+	 ("dired"	    (mode . dired-mode))
+	 ("browser"	   (or
+		            (name . "brave")
+			    (name . "qutebrowser")))
+	 ("elisp"	    (mode . emacs-lisp-mode))
+	 ("org"		    (mode . org-mode))
+	 ("python"	    (mode . python-mode))
+	 ("java"	    (mode . java-mode))
+	 ("lisp"           (or
+			    (mode . common-lisp-mode)
+			    (mode . lisp-mode)))
+	 ("clojure"	    (mode . clojure-mode))
+	 ("clojure-script"  (mode . clojurescript-mode))
+	 ("scheme"	    (mode . scheme-mode))
+	 ("haskell"	   (or
+			    (mode . haskell-mode)
+			    (mode . haskell-interactive-mode)))
+	 ("c/cpp"	   (or
+			    (mode . c-mode)
+			    (mode . c++-mode)))
+	 ("shell"	   (or
+			    (mode . ansi-term-mode)
+			    (mode . eshell-mode)
+			    (mode . term-mode)
+			    (mode . shell-mode)))
+	 ("exwm"	    (mode . exwm-mode))
+	 ("git"		    (name . "^magit"))
+	 ("telegram"	   (or
+			    (mode . telega-chat-mode)
+			    (mode . telega-root-mode)))
+	 ("don't kill"	   (or
+			    (mode . dashboard-mode)
+			    (name . "*scratch*")))
+	 ("emacs"	    (name . "^[*].+[*]$"))))
       ibuffer-show-empty-filter-groups nil)
 
 ;; Expand region configuration
@@ -972,8 +979,19 @@
   (add-hook 'c-mode-hook 'eglot-ensure)
   (add-hook 'haskell-mode-hook 'eglot-ensure)
   (add-hook 'python-mode-hook 'eglot-ensure)
+  (add-hook 'prolog-mode-hook 'eglot-ensure)
+  (add-hook 'clojure-mode-hook 'eglot-ensure)
   (add-hook 'eglot-managed-mode-hook #'activate-eglot-organize-file)
-  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster))
+  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs
+		 '(prolog-mode . ("swipl"
+				      "-g" "use_module(library(lsp_server))."
+				      "-g" "lsp_server:main"
+				      "-t" "halt"
+				      "--" "stdio"))))
+  (setq eglot-ignored-server-capabilities '(:hoverProvider)))
+
 (eglot-ensure)
 
 (define-key eglot-mode-map (kbd "C-c o") 'activate-eglot-organize-file)
@@ -1018,6 +1036,41 @@
 (use-package exec-path-from-shell)
 (exec-path-from-shell-initialize)
 
+;; Move Text
+(use-package drag-stuff
+  :bind
+  (("C-S-k" . drag-stuff-up))
+  ("C-S-j" . drag-stuff-down)
+  :config (drag-stuff-global-mode t))
+
+;; Prolog
+(setq prolog-system 'swi
+      prolog-electric-if-then-else-flag t)
+
+(use-package ediprolog
+  :config
+  (setq ediprolog-system 'swi))
+
+(defun prolog-insert-comment-block ()
+  "Insert a PceEmacs-style comment block like /* - - ... - - */ "
+  (interactive)
+  (let ((dashes "-"))
+    (dotimes (_ 36) (setq dashes (concat "- " dashes)))
+    (insert (format "/* %s\n\n%s */" dashes dashes))
+    (forward-line -1)
+    (indent-for-tab-command)))
+
+(add-hook 'prolog-mode-hook
+	  (lambda()
+	    (define-key prolog-mode-map (kbd "C-c c") 'prolog-insert-comment-block)
+	    (define-key prolog-mode-map (kbd "C-c l") '(lambda ()
+							 (interactive)
+							 (insert ":- use_module(library()).")
+							 (forward-char -3)))
+	    (define-key prolog-mode-map (kbd "C-c C-e") 'ediprolog-dwim)))
+
+(add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
+
 ;; Common Lisp
 (use-package sly
   :hook ((common-lisp-mode . sly-mode)
@@ -1028,22 +1081,13 @@
               (save-excursion (sly)))))
   (setq inferior-lisp-program "/usr/bin/sbcl"))
 
-;; Move Text
-(use-package drag-stuff
-  :bind
-  (("C-S-k" . drag-stuff-up))
-  ("C-S-j" . drag-stuff-down)
-  :config (drag-stuff-global-mode t))
+;; Clojure (CIDER)
+(use-package cider
+  :hook (clojure-mode))
 
-;; Prolog
-(use-package sweeprolog
-  :hook prolog-mode
-  :config
-  (add-to-list 'auto-mode-alist '("\\.pl\\'" . sweeprolog-mode))
-  (with-eval-after-load 'eglot
-    (add-to-list 'eglot-server-programs
-		 '(sweeprolog-mode . ("swipl"
-				      "-g" "use_module(library(lsp_server))."
-				      "-g" "lsp_server:main"
-				      "-t" "halt"
-				      "--" "stdio")))))
+;; Scheme (Guile)
+(use-package geiser)
+(use-package geiser-guile)
+
+;; ASM
+(setq asm-comment-char 35)
