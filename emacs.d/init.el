@@ -57,10 +57,10 @@
 
 ;; Initialize package sources
 (require 'package)
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-			 ("mepla-stable" . "https://stable.melpa.org/packages/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")
-			 ("nongnu-elpa" . "https://elpa.nongnu.org/nongnu/")))
+(setq package-archives '(("elpa"	 . "https://elpa.gnu.org/packages/")
+			 ("nongnu-elpa"	 . "https://elpa.nongnu.org/nongnu/")
+			 ("melpa-stable" . "https://stable.melpa.org/packages/")
+			 ("melpa"	 . "https://melpa.org/packages/")))
 (package-initialize)
 (unless package-archive-contents
   (package-refresh-contents))
@@ -373,25 +373,26 @@
 
 (use-package savehist
   :init (savehist-mode)
-  :config (setq history-length 25
-	        history-delete-duplicates t))
+  :config (setq history-length             25
+	        history-delete-duplicates  t
+		savehist-ignored-variables '(shell-command-history)))
 
 ;; Consult configuration
 (use-package consult
   :bind ("C-s" . consult-line))
 
 (leader-key-def
-  "c"	'(:ignore t :which-key "consult")
-  "cy"	'(consult-yank-from-kill-ring :which-key "kill ring")
-  "cl"	'(consult-goto-line :which-key "goto line")
-  "ci"	'(consult-imenu :which-key "imenu")
-  "cg"  '(consult-grep :which-key "grep")
-  "cl"  '(consult-goto-line :which-key "goto line")
-  "cf"  '(consult-locate :which-key "locate")
-  "cm"	'(evil-collection-consult-mark :which-key "mark history")
-  "ce"	'(:ignore t :which-key "error")
-  "cem" '(consult-flymake :which-key "flymake")
-  "cec" '(consult-flycheck :which-key "flycheck"))
+  "c"	'(:ignore t			:which-key "consult")
+  "cy"	'(consult-yank-from-kill-ring	:which-key "kill ring")
+  "cl"	'(consult-goto-line		:which-key "goto line")
+  "ci"	'(consult-imenu			:which-key "imenu")
+  "cg"  '(consult-git-grep		:which-key "grep")
+  "cl"  '(consult-goto-line		:which-key "goto line")
+  "cf"  '(consult-locate		:which-key "locate")
+  "cm"	'(evil-collection-consult-mark	:which-key "mark history")
+  "ce"	'(:ignore t			:which-key "error")
+  "cem" '(consult-flymake		:which-key "flymake")
+  "cec" '(consult-flycheck		:which-key "flycheck"))
 
 ;; Improved Candidate Filtering with Orderless
 (use-package orderless
@@ -1081,12 +1082,16 @@
               (save-excursion (sly)))))
   (setq inferior-lisp-program "/usr/bin/sbcl"))
 
-;; Clojure (CIDER)
+;; Clojure 
 (use-package cider
-  :hook (clojure-mode))
+  :hook (clojure-mode)
+  :config (setq cider-repl-display-help-banner nil))
 
 ;; Scheme (Guile)
-(use-package geiser)
+(use-package geiser
+  :config
+  (setq geiser-repl-history-filename "~/.cache/emacs/geiser-history")
+  (setq geiser-repl-history-size 1))
 (use-package geiser-guile)
 
 ;; ASM
