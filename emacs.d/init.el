@@ -344,7 +344,8 @@
   :config
   (evil-set-undo-system 'undo-tree)
   (global-undo-tree-mode 1)
-  (setq undo-tree-history-directory-alist `(("." . ,(expand-file-name "undo" user-emacs-directory)))))
+  (setq undo-tree-history-directory-alist
+	`(("." . ,(expand-file-name "undo" user-emacs-directory)))))
 
 ;; Hydra
 (use-package hydra
@@ -844,6 +845,13 @@
   (interactive)
   (eshell 'N))
 
+(defun eshell-add-aliases ()
+  (add-to-list 'eshell-command-aliases-list
+	       '("arruma_teclado"
+		 "setxkbmap -layout br -variant abnt2 && xmodmap ~/.Xmodmap")))
+
+(add-hook 'eshell-post-command-hook 'eshell-add-aliases)
+
   ;; Fish Completions
 (use-package fish-completion
   :hook (eshell-mode . fish-completion-mode))
@@ -1088,11 +1096,25 @@
   :config (setq cider-repl-display-help-banner nil))
 
 ;; Scheme (Guile)
+(defun clear-geiser-history ()
+  (interactive)
+  (let ((history-files
+	 (directory-files user-emacs-directory t "geiser-history\\..*" t)))
+    (dolist (file history-files)
+      (when (file-exists-p file)
+        (delete-file file)))))
+
 (use-package geiser
   :config
-  (setq geiser-repl-history-filename "~/.cache/emacs/geiser-history")
-  (setq geiser-repl-history-size 1))
+  (setq geiser-repl-history-filename
+	(expand-file-name "geiser-history" user-emacs-directory))
+  ;; The geiser repl doesn't have a kill/quit hook, so I decided to
+  ;; clear the history on the startup
+  (add-hook 'geiser-repl-startup-hook #'clear-geiser-history))
 (use-package geiser-guile)
 
 ;; ASM
 (setq asm-comment-char 35)
+
+;; Guix
+(use-package guix)
