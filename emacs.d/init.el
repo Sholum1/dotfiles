@@ -1097,6 +1097,7 @@
 
 ;; Scheme (Guile)
 (defun clear-geiser-history ()
+  "Clear geiser repl history."
   (interactive)
   (let ((history-files
 	 (directory-files user-emacs-directory t "geiser-history\\..*" t)))
@@ -1109,8 +1110,9 @@
   (setq geiser-repl-history-filename
 	(expand-file-name "geiser-history" user-emacs-directory))
   ;; The geiser repl doesn't have a kill/quit hook, so I decided to
-  ;; clear the history on the startup
-  (add-hook 'geiser-repl-startup-hook #'clear-geiser-history))
+  ;; clear the history on the startup.
+  (add-hook 'geiser-repl-mode-hook #'clear-geiser-history))
+
 (use-package geiser-guile)
 
 ;; ASM
