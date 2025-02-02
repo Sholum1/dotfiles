@@ -1,0 +1,6 @@
+clear Lock
+clear Mod4
+keycode 66 = Escape
+keycode 9 = Caps_Lock
+
+keycode 25 = w W w W bar bar bar bar
