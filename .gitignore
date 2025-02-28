@@ -1,9 +1,0 @@
-*.gitignore
-emacs.d/*
-!emacs.d/init.el
-!emacs.d/Sholum-theme.el
-!emacs.d/exwm
-!emacs.d/exwm/*
-config/qutebrowser/*
-!config/qutebrowser/config.py
-!config/qutebrowser/autoconfig.yml
