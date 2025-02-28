@@ -6,6 +6,7 @@
       native-comp-async-report-warnings-errors nil  ; Silence Compiler warnings
       package-install-upgrade-built-in t)           ; Upgrade the built-in packages
 
+(require 'iso-transl)
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
 (set-fringe-mode 15)        ; Give some breathing room
@@ -69,8 +70,8 @@
 (load-theme 'Sholum t)
 
 ;; Use-package configuration
-(require 'use-package-ensure)
-(setq use-package-always-ensure t)
+;; (require 'use-package-ensure)
+;; (setq use-package-always-ensure t)
 
 ;; Set up the visible bell
 (setq visible-bell t)
@@ -125,11 +126,12 @@
 
 (defun exwm-update-title ()
   (pcase exwm-class-name
-    ("Brave-browser" (exwm-workspace-rename-buffer (format "%s" exwm-title)))
-    ("qutebrowser" (exwm-workspace-rename-buffer (format "%s" exwm-title)))
-    ("okular" (exwm-workspace-rename-buffer (format "%s" exwm-title)))))
+    ("Icecat"   (exwm-workspace-rename-buffer (format "%s" exwm-title)))
+    ("Chromium" (exwm-workspace-rename-buffer (format "%s" exwm-title)))
+    ("okular"   (exwm-workspace-rename-buffer (format "%s" exwm-title)))))
 
 (use-package exwm
+  :demand t
   :config
   ;; Set the default number of workspaces
   (setq exwm-workspace-number 5)
@@ -143,25 +145,22 @@
   ;; When EXWM starts up, do some extra configuration
   (add-hook 'exwm-init-hook #'exwm-init-hook)
 
-  ;; Rebind ESC to CapsLock and vice versa
-  (start-process-shell-command "xmodmap" nil "xmodmap ~/.emacs.d/exwm/Xmodmap")
-
   ;; Set the screen resolution
   (require 'exwm-randr)
   (setq exwm-randr-workspace-output-plist '(3 "HDMI-2" 4 "HDMI-2" 5 "HDMI-2"))
   (start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output DP-1 --off --output HDMI-1 --off --output HDMI-2 --mode 1920x1080 --pos 1920x0 --rotate normal")
   ;; (start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output DP-1 --off --output HDMI-1 --off --output HDMI-2 --mode 1920x1080 --pos 1920x0 --rotate normal")
 
-  (exwm-randr-enable)
+  (exwm-randr-mode)
 
   ;; Systemtray
   (require 'exwm-systemtray)
-  (exwm-systemtray-enable)
+  (exwm-systemtray-mode)
 
   ;; Set the wallpaper
   (defun set-wallpaper ()
     (interactive)
-    (start-process-shell-command "feh" nil "feh --bg-scale ~/Downloads/.Wallpaper.jpg"))
+    (start-process-shell-command "feh" nil "feh --bg-scale ~/Pictures/.Wallpaper.jpg"))
   (set-wallpaper)
 
   ;; These keys should always pass through to Emacs
@@ -203,14 +202,6 @@
 			  (exwm-workspace-switch-create ,i))))
 		    (number-sequence 0 9))))
 
-  ;; Since 'exwm-input-set-key' does not accept lists, here is a replacement
-  (defun exwm-key-input (i)
-    (mapcar (lambda (arg)
-              (let ((key (car arg))
-                    (fun (cdr arg)))
-		(exwm-input-set-key (kbd key) fun)))
-	    i))
-
   ;; Don't let ediff break EXWM, keep it in one frame
   (setq ediff-diff-options "-w"
 	ediff-split-window-function 'split-window-horizontally
@@ -218,6 +209,14 @@
 
   ;; Enable exwm
   (exwm-enable))
+
+  ;; Since 'exwm-input-set-key' does not accept lists, here is a replacement
+  (defun exwm-key-input (i)
+    (mapcar (lambda (arg)
+              (let ((key (car arg))
+                    (fun (cdr arg)))
+		(exwm-input-set-key (kbd key) fun)))
+	    i))
 
   ;; Launch apps that will run in the background
   (defun run-in-background (command)
@@ -228,21 +227,22 @@
   (run-in-background "nm-applet")
   (run-in-background "dunst")
   (run-in-background "caffeine")
-  (run-in-background "redshift -O 3800 -P -r")
-  (run-in-background "kdeconnect-cli")
+  (run-in-background "redshift -O 3200 -P -r")
   (run-in-background "xbanish")
 
 ;; Dashboard configuration
 (use-package dashboard
+  :demand t
   :config
   (setq dashboard-banner-logo-title "Welcome to Emacs, Sholum"
 	dashboard-startup-banner 'logo
 	dashboard-set-init-info t
 	dashboard-center-content t
+	dashboard-icon-type 'all-the-icons
 	dashboard-items '((recents . 10)
 			  (agenda . 15)
-			  (bookmarks . 5))))
-(dashboard-setup-startup-hook)
+			  (bookmarks . 5)))
+  (dashboard-setup-startup-hook))
 
 ;; Desktop Environment configuration
 (use-package desktop-environment
@@ -261,8 +261,8 @@
      ("s-M" . desktop-environment-toggle-mute)
      ("s-s" . desktop-environment-screenshot)
      ("s-S" . desktop-environment-screenshot-part)))
-  (setq desktop-environment-screenshot-command "spectacle -b -n"
-	desktop-environment-screenshot-partial-command "spectacle -r -b -n")
+  ;; (setq desktop-environment-screenshot-command "spectacle -b -n"
+  ;; 	desktop-environment-screenshot-partial-command "spectacle -r -b -n")
   :custom
   (desktop-environment-brightness-small-increment "1%+")
   (desktop-environment-brightness-small-decrement "1%-")
@@ -327,6 +327,7 @@
   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
   (evil-set-initial-state 'messages-buffer-mode 'normal)
+  ;; (evil-set-initial-state 'exwm-mode 'emacs)
   (evil-set-initial-state 'dashboard-mode 'normal))
 
   ;; Evil collection
@@ -387,7 +388,7 @@
   "cy"	'(consult-yank-from-kill-ring	:which-key "kill ring")
   "cl"	'(consult-goto-line		:which-key "goto line")
   "ci"	'(consult-imenu			:which-key "imenu")
-  "cg"  '(consult-git-grep		:which-key "grep")
+  "cg"  '(consult-grep  		:which-key "grep")
   "cl"  '(consult-goto-line		:which-key "goto line")
   "cf"  '(consult-locate		:which-key "locate")
   "cm"	'(evil-collection-consult-mark	:which-key "mark history")
@@ -600,6 +601,10 @@
   "wdd" '(delete-window :which-key "current window")
   "wdo" '(delete-other-windows :which-key "other windows"))
 
+;; This is dangerous because it replaces a default keybinding (vc-prefix);
+;;  use this only if you don't use too many version control commands.
+(global-set-key (kbd "C-x v") 'shrink-window)
+
 ; Yasnippet configuration
 (use-package yasnippet-snippets)
 (use-package yasnippet
@@ -654,42 +659,45 @@
   "br"  '(rename-buffer :which-key "rename buffer"))
 
   ;; Ibuffer configuration
-(add-hook 'ibuffer-mode-hook (lambda () (ibuffer-auto-mode 1) (ibuffer-switch-to-saved-filter-groups "default")))
+(add-hook 'ibuffer-mode-hook
+	  (lambda ()
+	    (ibuffer-auto-mode 1)
+	    (ibuffer-switch-to-saved-filter-groups "default")))
 (setq ibuffer-saved-filter-groups
       '(("default"
 	 ("dired"	    (mode . dired-mode))
-	 ("browser"	   (or
-		            (name . "brave")
-			    (name . "qutebrowser")))
+	 ("browser"	    (or
+		             (name . "brave")
+			     (name . "qutebrowser")))
 	 ("elisp"	    (mode . emacs-lisp-mode))
 	 ("org"		    (mode . org-mode))
 	 ("python"	    (mode . python-mode))
 	 ("java"	    (mode . java-mode))
-	 ("lisp"           (or
-			    (mode . common-lisp-mode)
-			    (mode . lisp-mode)))
-	 ("clojure"	    (mode . clojure-mode))
-	 ("clojure-script"  (mode . clojurescript-mode))
+	 ("lisp"            (or
+			     (mode . common-lisp-mode)
+			     (mode . lisp-mode)))
+	 ("clojure(script)" (or (mode . clojure-mode)
+				(mode . clojurescript-mode)))
 	 ("scheme"	    (mode . scheme-mode))
-	 ("haskell"	   (or
-			    (mode . haskell-mode)
-			    (mode . haskell-interactive-mode)))
-	 ("c/cpp"	   (or
-			    (mode . c-mode)
-			    (mode . c++-mode)))
-	 ("shell"	   (or
-			    (mode . ansi-term-mode)
-			    (mode . eshell-mode)
-			    (mode . term-mode)
-			    (mode . shell-mode)))
+	 ("haskell"	    (or
+			     (mode . haskell-mode)
+			     (mode . haskell-interactive-mode)))
+	 ("c/cpp"	    (or
+			     (mode . c-mode)
+			     (mode . c++-mode)))
+	 ("shell"	    (or
+			     (mode . ansi-term-mode)
+			     (mode . eshell-mode)
+			     (mode . term-mode)
+			     (mode . shell-mode)))
 	 ("exwm"	    (mode . exwm-mode))
 	 ("git"		    (name . "^magit"))
-	 ("telegram"	   (or
-			    (mode . telega-chat-mode)
-			    (mode . telega-root-mode)))
-	 ("don't kill"	   (or
-			    (mode . dashboard-mode)
-			    (name . "*scratch*")))
+	 ("telegram"	    (or
+			     (mode . telega-chat-mode)
+			     (mode . telega-root-mode)))
+	 ("don't kill"	    (or
+			     (mode . dashboard-mode)
+			     (name . "*scratch*")))
 	 ("emacs"	    (name . "^[*].+[*]$"))))
       ibuffer-show-empty-filter-groups nil)
 
@@ -699,56 +707,45 @@
 	 ("s-{" . er/mark-outside-pairs)))
 
 ;; Dired configuration
-  ;; Omit-mode
-(use-package dired
-  :ensure nil
-  :defer 1
-  :commands (dired dired-jump)
-  :bind (("M-+" . dired-create-empty-file))
-  :config
-  (setq dired-listing-switches "-agho --group-directories-first"
-        dired-omit-files "^\\.[^.].*"
-        dired-omit-verbose nil))
 
-(autoload 'dired-omit-mode "dired-x")
+;; dired-omit-mode has some bug and I didn't find any solution
 
-(add-hook 'dired-mode-hook
-    (lambda ()
-    (interactive)
-    (dired-omit-mode 1)))
-
-  ;; Dired design configuration
+;; (require 'dired-x)
+;; (autoload 'dired-omit-mode "dired-x")
 (use-package all-the-icons)
 (use-package all-the-icons-dired)
-(add-hook 'dired-mode-hook
-  (lambda ()
-  (interactive)
-  (all-the-icons-dired-mode 1)
-  (hl-line-mode 1)))
-
-(add-hook 'dired-load-hook
-  (lambda ()
-  (interactive)
-  (dired-collapse)))
-
-(use-package dired-single
-  :commands (dired dired-jump)
-  :defer t)
-
 (use-package dired-ranger
   :defer t)
 
-(use-package dired-collapse
-  :defer t)
+(use-package dired
+  :ensure nil
+  :defer l
+  :bind (:map dired-mode-map
+	      ("M-+" . dired-create-empty-file))
+  :commands (dired dired-jump)
+  :config
+  (setq dired-listing-switches "-agho --group-directories-first"
+        dired-omit-files "^\\.[^.].*"
+        dired-omit-verbose nil
+	dired-dwim-target 'dired-dwim-target-next
+	dired-kill-when-opening-new-dired-buffer t
+	delete-by-moving-to-trash t)
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "h" 'dired-up-directory
+    ;; "H" 'dired-omit-mode
+    "l" 'dired-find-file
+    "y" 'dired-ranger-copy
+    "n" 'dired-ranger-move
+    "p" 'dired-ranger-paste)
+  :hook
+  (dired-mode . (lambda ()
+		  (interactive)
+		  (all-the-icons-dired-mode 1)
+		  (hl-line-mode 1))))
+		  ;; (dired-omit-mode 1))))
 
-;; Key bindings
-(evil-collection-define-key 'normal 'dired-mode-map
-  "h" 'dired-single-up-directory
-  "H" 'dired-omit-mode
-  "l" 'dired-single-buffer
-  "y" 'dired-ranger-copy
-  "n" 'dired-ranger-move
-  "p" 'dired-ranger-paste)
+(use-package diredfl
+  :hook (dired-mode . diredfl-mode))
 
 ;; Bindings for files
 (leader-key-def
@@ -918,17 +915,6 @@
   "se"	'(eshell-instance :which-key "eshell")
   "ss"	'(shell :which-key "shell"))
 
-;; KDE Connect
-(use-package kdeconnect
-  :config
-  (setq kdeconnect-devices "fe5c4316cee0e91f"
-	kdeconnect-active-device "fe5c4316cee0e91f")
-  (leader-key-def
-    "k" '(:ignore t :which-key "kdeconnect")
-    "ks" '(kdeconnect-send-file :which-key "send file")
-    "kf" '(kdeconnect-ring :which-key "find phone")
-    "kt" '(kdeconnect-send-text-region-or-prompt :which-key "send text")))
-
 ;; Better Help buffers with Helpful
 (use-package helpful
   :bind
@@ -1083,16 +1069,19 @@
 ;; Common Lisp
 (use-package sly
   :hook ((common-lisp-mode . sly-mode)
-	 (lisp.mode . sly-mode))
+	 (lisp-mode . sly-mode))
   :config (add-hook 'sly-mode-hook
           (lambda ()
             (unless (sly-connected-p)
               (save-excursion (sly)))))
-  (setq inferior-lisp-program "/usr/bin/sbcl"))
+  (setq inferior-lisp-program "~/.guix-profile/bin/sbcl"))
 
 ;; Clojure 
 (use-package cider
   :hook (clojure-mode)
+  :bind (:map cider-repl-mode-map
+	      ("C-c C-b" . cider-repl-switch-to-other)
+	      ("C-c M-o" . cider-repl-clear-buffer))
   :config (setq cider-repl-display-help-banner nil))
 
 ;; Scheme (Guile)
@@ -1119,4 +1108,28 @@
 (setq asm-comment-char 35)
 
 ;; Guix
-(use-package guix)
+(use-package guix
+  :ensure nil ; Provided by Guix.
+  :config
+  ;; NOTE: This is the only way to avoid colisions between compiled '.go' files and
+  ;; `geiser' versions. The other option is to install geiser and guix under the
+  ;; same profile. This is problematic since the only `guix' binary you should be
+  ;; using is the one located at '~/.config/guix/current/bin/guix'.
+  (with-eval-after-load 'guix-repl
+    (setq guix-guile-program  '("guix" "repl")
+          guix-config-scheme-compiled-directory  nil
+          guix-repl-use-latest  nil
+          guix-repl-use-server  nil))
+
+  (add-hook 'shell-mode-hook 'guix-build-log-minor-mode)
+
+  ;; Show short git hash.
+  (setq guix-prettify-regexp
+        "/\\(?:store\\|log\\|nar\\(?:/\\(?:gzip\\|lzip\\|zstd\\)\\)?\\)/[0-9a-df-np-sv-z]\\{7\\}\\([0-9a-df-np-sv-z]\\{25\\}\\)")
+  :init
+  (global-guix-prettify-mode 1))
+
+(leader-key-def
+  "g"	'(guix :which-key "guix"))
+
+(dashboard-refresh-buffer)

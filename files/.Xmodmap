@@ -1,0 +1,6 @@
+clear Lock
+keycode 66 = Escape
+keycode 9 = Caps_Lock
+
+keycode 25 = w W w W question bar question bar
+keycode 24 = q Q q Q slash backslash slash backslash
