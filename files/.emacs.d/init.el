@@ -725,8 +725,8 @@
   :commands (dired dired-jump)
   :config
   (setq dired-listing-switches "-agho --group-directories-first"
-        dired-omit-files "^\\.[^.].*"
-        dired-omit-verbose nil
+        ;; dired-omit-files "^\\.[^.].*"
+        ;; dired-omit-verbose nil
 	dired-dwim-target 'dired-dwim-target-next
 	dired-kill-when-opening-new-dired-buffer t
 	delete-by-moving-to-trash t)
@@ -826,13 +826,19 @@
   (setq proced-auto-update-interval 1
 	proced-enable-color-flag t)
   (add-to-list 'proced-format-alist
-	       '(custom user pid ppid sess tree pcpu pmem rss start time state (args comm)))
+	       '(custom user pid ppid sess tree pcpu pmem
+			rss start time state (args comm)))
   (setq-default proced-format 'custom)
   (add-hook 'proced-mode-hook
             (lambda ()
               (proced-toggle-auto-update 1))))
 
 ;; Eshell configuration
+(use-package eshell
+  :config
+  (setq eshell-aliases-file
+	(expand-file-name "~/.dotfiles/files/.emacs.d/eshell/alias")))
+
 (use-package evil-collection-eshell
   :ensure nil
   :init
@@ -841,13 +847,6 @@
 (defun eshell-instance ()
   (interactive)
   (eshell 'N))
-
-(defun eshell-add-aliases ()
-  (add-to-list 'eshell-command-aliases-list
-	       '("arruma_teclado"
-		 "setxkbmap -layout br -variant abnt2 && xmodmap ~/.Xmodmap")))
-
-(add-hook 'eshell-post-command-hook 'eshell-add-aliases)
 
   ;; Fish Completions
 (use-package fish-completion
@@ -870,9 +869,10 @@
               (setq-local corfu-auto nil)
               (corfu-mode)))
 
-  ;; Eat
-  (use-package eat)
-  (add-hook 'eshell-first-time-mode-hook #'eat-eshell-mode)
+;; Eat
+(use-package eat
+  :config
+  (add-hook 'eshell-load-hook #'eat-eshell-visual-command-mode))
 
 ;; Stop Async Shell commands from split the window
 (add-to-list 'display-buffer-alist
@@ -1028,8 +1028,11 @@
   :hook (eglot-java-mode . java-mode))
 
 ;; Give emacs the ENV from Shell
-(use-package exec-path-from-shell)
-(exec-path-from-shell-initialize)
+(use-package exec-path-from-shell
+  :demand t
+  :config
+  (setq exec-path-from-shell-check-startup-files nil)
+  (exec-path-from-shell-initialize))
 
 ;; Move Text
 (use-package drag-stuff
