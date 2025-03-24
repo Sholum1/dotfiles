@@ -1,7 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
 ;; Emacs initialization
-(setq inhibit-startup-message t 		    ; Disable the startup message
+(setq inhibit-startup-message t         ; Disable the startup message
       column-number-indicator-zero-based nil        ; Column number starts at one
       native-comp-async-report-warnings-errors nil  ; Silence Compiler warnings
       package-install-upgrade-built-in t)           ; Upgrade the built-in packages
@@ -13,8 +13,8 @@
 (menu-bar-mode -1)          ; Disable the menu bar
 (scroll-bar-mode -1)        ; Disable visible scrollbar
 (display-battery-mode 1)    ; Display battery status
-(column-number-mode)	    ; Display column number
-(repeat-mode)		    ; Enable repeat-mode
+(column-number-mode)      ; Display column number
+(repeat-mode)        ; Enable repeat-mode
 
 ;; Startup performance
   ;; Reducing the frequency of garbage collection
@@ -31,10 +31,10 @@
 
 ;; Improve scrolling
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1)) ; one line at a time
-      mouse-wheel-progressive-speed nil 	   ; don't accelerate scrolling
-      mouse-wheel-follow-mouse 't 		   ; scroll window under mouse
-      scroll-step 1				   ; scroll one line at time
-      scroll-margin 5)				   ; set the margin to five lines
+      mouse-wheel-progressive-speed nil      ; don't accelerate scrolling
+      mouse-wheel-follow-mouse 't        ; scroll window under mouse
+      scroll-step 1           ; scroll one line at time
+      scroll-margin 5)           ; set the margin to five lines
 
 ;; Set frame transparency and maximize windows by default
 (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
@@ -58,10 +58,10 @@
 
 ;; Initialize package sources
 (require 'package)
-(setq package-archives '(("elpa"	 . "https://elpa.gnu.org/packages/")
-			 ("nongnu-elpa"	 . "https://elpa.nongnu.org/nongnu/")
-			 ("melpa-stable" . "https://stable.melpa.org/packages/")
-			 ("melpa"	 . "https://melpa.org/packages/")))
+(setq package-archives '(("elpa"   . "https://elpa.gnu.org/packages/"))
+       ("nongnu-elpa"   . "https://elpa.nongnu.org/nongnu/")
+       ("melpa-stable" . "https://stable.melpa.org/packages/")
+       ("melpa"   . "https://melpa.org/packages/"))
 (package-initialize)
 (unless package-archive-contents
   (package-refresh-contents))
@@ -164,59 +164,59 @@
   (set-wallpaper)
 
   ;; These keys should always pass through to Emacs
-  (setq exwm-input-prefix-keys
-	'(?\C-x
-	  ?\C-u
-	  ?\C-h
-	  ?\C-w
-	  ?\M-x
-	  ?\M-`
-	  ?\M-&
-	  ?\M-:
-	  ?\C-\M-j ;; Buffer list
-	  ?\C-\ )) ;; Ctrl-Space
+  (setq exwm-input-prefix-keys)
+  '(?\C-x
+    ?\C-u
+    ?\C-h
+    ?\C-w
+    ?\M-x
+    ?\M-`
+    ?\M-&
+    ?\M-:
+    ?\C-\M-j ;; Buffer list
+    ?\C-\ ) ;; Ctrl-Space
 
   ;; Ctrl-Q will enable the next key to be sent directly
   (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
 
   ;; Set up global key bindings. These always work, no matter the input state!
   ;; Keep in mind that changing this list after EXWM initialize has no effect.
-  (setq exwm-input-global-keys
-	`(
-	  ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
-	  ([?\s-r] . exwm-reset)
+  (setq exwm-input-global-keys)
+  `(
+    ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
+    ([?\s-r] . exwm-reset)
 
-	  ;; Launch applications via shell command
-	  ([?\s- ] . (lambda (command)
-		       (interactive (list (read-shell-command "$ ")))
-		       (start-process-shell-command command nil command)))
+    ;; Launch applications via shell command
+    ([?\s- ] . (lambda (command))
+            (interactive (list (read-shell-command "$ ")))
+            (start-process-shell-command command nil command))
 
-	  ;; Switch workspace
-	  ([?\s-w] . exwm-workspace-switch)
+    ;; Switch workspace
+    ([?\s-w] . exwm-workspace-switch)
 
-	  ;; 's-N': Switch to certain workspace with Super plus a number key (0-9)
-	  ,@(mapcar (lambda (i)
-		      `(,(kbd (format "s-%d" i)) .
-			(lambda()
-			  (interactive)
-			  (exwm-workspace-switch-create ,i))))
-		    (number-sequence 0 9))))
+    ;; 's-N': Switch to certain workspace with Super plus a number key (0-9)
+    ,@(mapcar (lambda (i))
+           `(,(kbd (format "s-%d" i)) .)
+       (lambda()
+            (interactive)
+            (exwm-workspace-switch-create ,i)
+            (number-sequence 0 9))))
 
   ;; Don't let ediff break EXWM, keep it in one frame
-  (setq ediff-diff-options "-w"
-	ediff-split-window-function 'split-window-horizontally
-	ediff-window-setup-function 'ediff-setup-windows-plain)
+  (setq ediff-diff-options "-w")
+  ediff-split-window-function 'split-window-horizontally
+  ediff-window-setup-function 'ediff-setup-windows-plain
 
   ;; Enable exwm
-  (exwm-enable))
+  (exwm-enable)
 
   ;; Since 'exwm-input-set-key' does not accept lists, here is a replacement
   (defun exwm-key-input (i)
     (mapcar (lambda (arg)
               (let ((key (car arg))
-                    (fun (cdr arg)))
-		(exwm-input-set-key (kbd key) fun)))
-	    i))
+                    (fun (cdr arg))))))
+    (exwm-input-set-key (kbd key) fun
+        i))
 
   ;; Launch apps that will run in the background
   (defun run-in-background (command)
@@ -228,20 +228,20 @@
   (run-in-background "dunst")
   (run-in-background "caffeine")
   (run-in-background "redshift -O 3200 -P -r")
-  (run-in-background "xbanish")
+  (run-in-background "xbanish"))
 
 ;; Dashboard configuration
 (use-package dashboard
   :demand t
   :config
-  (setq dashboard-banner-logo-title "Welcome to Emacs, Sholum"
-	dashboard-startup-banner 'logo
-	dashboard-set-init-info t
-	dashboard-center-content t
-	dashboard-icon-type 'all-the-icons
-	dashboard-items '((recents . 10)
-			  (agenda . 15)
-			  (bookmarks . 5)))
+  (setq dashboard-banner-logo-title "Welcome to Emacs, Sholum")
+  dashboard-startup-banner 'logo
+  dashboard-set-init-info t
+  dashboard-center-content t
+  dashboard-icon-type 'all-the-icons
+  dashboard-items '((recents . 10))
+        (agenda . 15)
+        (bookmarks . 5)
   (dashboard-setup-startup-hook))
 
 ;; Desktop Environment configuration
@@ -293,8 +293,8 @@
   :init (which-key-mode)
   :diminish which-key-mode
   :config
-  (setq which-key-idle-delay 0.1
-	which-key-allow-evil-operators t))
+  (setq which-key-idle-delay 0.1)
+  which-key-allow-evil-operators t)
 
   ;; ESC cancels all
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
@@ -311,11 +311,11 @@
 
 (use-package evil
   :init
-  (setq evil-want-integration t
-	evil-want-keybinding nil
-	evil-want-C-i-jump t
-	evil-respect-visual-line-mode t
-	evil-move-beyond-eol t)
+  (setq evil-want-integration t)
+  evil-want-keybinding nil
+  evil-want-C-i-jump t
+  evil-respect-visual-line-mode t
+  evil-move-beyond-eol t
   :config
   (add-hook 'evil-mode-hook 'evil-hook)
   (evil-mode 1)
@@ -345,8 +345,8 @@
   :config
   (evil-set-undo-system 'undo-tree)
   (global-undo-tree-mode 1)
-  (setq undo-tree-history-directory-alist
-	`(("." . ,(expand-file-name "undo" user-emacs-directory)))))
+  (setq undo-tree-history-directory-alist)
+  `(("." . ,(expand-file-name "undo" user-emacs-directory))))
 
 ;; Hydra
 (use-package hydra
@@ -365,43 +365,43 @@
 (use-package vertico
   :init (vertico-mode)
   :bind
-  (:map vertico-map
-	("C-j" . vertico-next)
-	("C-k" . vertico-previous)
-  (:map minibuffer-local-map
-	("C-DEL" . minibuffer-backward-kill)))
-  :custom
-  (vertico-cycle t))
+  (:map vertico-map)
+  ("C-j" . vertico-next)
+  ("C-k" . vertico-previous
+   (:map minibuffer-local-map))
+  ("C-DEL" . minibuffer-backward-kill
+   :custom
+   (vertico-cycle t)))
 
 (use-package savehist
   :init (savehist-mode)
-  :config (setq history-length             25
-	        history-delete-duplicates  t
-		savehist-ignored-variables '(shell-command-history)))
+  :config (setq history-length             25)
+          history-delete-duplicates  t
+    savehist-ignored-variables '(shell-command-history))
 
 ;; Consult configuration
 (use-package consult
   :bind ("C-s" . consult-line))
 
 (leader-key-def
-  "c"	'(:ignore t			:which-key "consult")
-  "cy"	'(consult-yank-from-kill-ring	:which-key "kill ring")
-  "cl"	'(consult-goto-line		:which-key "goto line")
-  "ci"	'(consult-imenu			:which-key "imenu")
-  "cg"  '(consult-grep  		:which-key "grep")
-  "cl"  '(consult-goto-line		:which-key "goto line")
-  "cf"  '(consult-locate		:which-key "locate")
-  "cm"	'(evil-collection-consult-mark	:which-key "mark history")
-  "ce"	'(:ignore t			:which-key "error")
-  "cem" '(consult-flymake		:which-key "flymake")
-  "cec" '(consult-flycheck		:which-key "flycheck"))
+  "c"  '(:ignore t      :which-key "consult")
+  "cy"  '(consult-yank-from-kill-ring  :which-key "kill ring")
+  "cl"  '(consult-goto-line    :which-key "goto line")
+  "ci"  '(consult-imenu      :which-key "imenu")
+  "cg"  '(consult-grep      :which-key "grep")
+  "cl"  '(consult-goto-line    :which-key "goto line")
+  "cf"  '(consult-locate    :which-key "locate")
+  "cm"  '(evil-collection-consult-mark  :which-key "mark history")
+  "ce"  '(:ignore t      :which-key "error")
+  "cem" '(consult-flymake    :which-key "flymake")
+  "cec" '(consult-flycheck    :which-key "flycheck"))
 
 ;; Improved Candidate Filtering with Orderless
 (use-package orderless
   :config
-  (setq completion-styles '(orderless)
-	completion-category-defaults nil
-	completion-category-overrides '((file (styles . (partial-completion))))))
+  (setq completion-styles '(orderless))
+  completion-category-defaults nil
+  completion-category-overrides '((file (styles . (partial-completion)))))
 
 ;; Completion Annotations with Marginalia
 (use-package marginalia
@@ -472,8 +472,8 @@
 ;; Flymake configuration
 (use-package flymake
   :defer t
-  :hook ((org-mode . flymake-mode)
-	 (prog-mode . flymake-mode)))
+  :hook ((org-mode . flymake-mode))
+   (prog-mode . flymake-mode))
 
 ;; Flycheck configuration
 (use-package flycheck
@@ -489,9 +489,9 @@
 
 ;;
 (use-package ws-butler
-  :hook (((text-mode . ws-butler-mode)
+  :hook (((text-mode . ws-butler-mode))
          (prog-mode . ws-butler-mode)
-         (org-mode . ws-butler-mode))))
+         (org-mode . ws-butler-mode)))
 
 ;; Displaying World Time
 (setq world-clock-list
@@ -500,8 +500,8 @@
     ("America/New_York" "New York")
     ("Europe/Athens" "Athens")
     ("Pacific/Auckland" "Auckland")
-    ("Asia/Shanghai" "Shanghai"))
-    world-clock-format "%a, %d %b %H:%M %p %Z")
+    ("Asia/Shanghai" "Shanghai")
+    world-clock-format "%a, %d %b %H:%M %p %Z"))
 
 ;; Mode Line
   ;; Basic
@@ -521,7 +521,7 @@
   (setq sml/mode-width 'right
       sml/name-width 60)
 
-  (setq-default mode-line-format
+  (setq-default mode-line-format)
   `("%e"
       mode-line-front-space
       evil-mode-line-tag
@@ -538,7 +538,7 @@
       sml/pre-modes-separator
       mode-line-modes
       " "
-      mode-line-misc-info)))
+      mode-line-misc-info))
 
 
   ;; Doom modeline
@@ -565,8 +565,8 @@
   (doom-modeline-icon t)
   (doom-modeline-buffer-state-icon t)
   (doom-modeline-buffer-modification-icon t)
-  (doom-modeline-major-mode-icon t))
-  (doom-modeline-mode 1)
+  (doom-modeline-major-mode-icon t)
+  (doom-modeline-mode 1))
 
 ;; Keychord
 (use-package use-package-chords
@@ -617,17 +617,17 @@
 (use-package corfu
   ;; :hook (corfu-mode . corfu-popupinfo-mode)
   :config
-  (setq corfu-popupinfo-delay t
-	tab-always-indent 'complete)
+  (setq corfu-popupinfo-delay t)
+  tab-always-indent 'complete
   :custom
   (corfu-auto t)
   (corfu-cycle t)
-  :bind (:map corfu-map
-	      ("C-j" . corfu-next)
-	      ("C-k" . corfu-previous)
-	      ("TAB" . corfu-insert)
-	      ([tab] . corfu-insert)
-	      ("M-<return>" . corfu-quit))
+  :bind (:map corfu-map)
+        ("C-j" . corfu-next)
+        ("C-k" . corfu-previous)
+        ("TAB" . corfu-insert)
+        ([tab] . corfu-insert)
+        ("M-<return>" . corfu-quit)
   :init
   (global-corfu-mode)
   :config
@@ -660,51 +660,51 @@
 
   ;; Ibuffer configuration
 (add-hook 'ibuffer-mode-hook
-	  (lambda ()
-	    (ibuffer-auto-mode 1)
-	    (ibuffer-switch-to-saved-filter-groups "default")))
+    (lambda ()
+      (ibuffer-auto-mode 1)
+      (ibuffer-switch-to-saved-filter-groups "default")))
 (setq ibuffer-saved-filter-groups
-      '(("default"
-	 ("dired"	    (mode . dired-mode))
-	 ("browser"	    (or
-		             (name . "brave")
-			     (name . "qutebrowser")))
-	 ("elisp"	    (mode . emacs-lisp-mode))
-	 ("org"		    (mode . org-mode))
-	 ("python"	    (mode . python-mode))
-	 ("java"	    (mode . java-mode))
-	 ("lisp"            (or
-			     (mode . common-lisp-mode)
-			     (mode . lisp-mode)))
-	 ("clojure(script)" (or (mode . clojure-mode)
-				(mode . clojurescript-mode)))
-	 ("scheme"	    (mode . scheme-mode))
-	 ("haskell"	    (or
-			     (mode . haskell-mode)
-			     (mode . haskell-interactive-mode)))
-	 ("c/cpp"	    (or
-			     (mode . c-mode)
-			     (mode . c++-mode)))
-	 ("shell"	    (or
-			     (mode . ansi-term-mode)
-			     (mode . eshell-mode)
-			     (mode . term-mode)
-			     (mode . shell-mode)))
-	 ("exwm"	    (mode . exwm-mode))
-	 ("git"		    (name . "^magit"))
-	 ("telegram"	    (or
-			     (mode . telega-chat-mode)
-			     (mode . telega-root-mode)))
-	 ("don't kill"	    (or
-			     (mode . dashboard-mode)
-			     (name . "*scratch*")))
-	 ("emacs"	    (name . "^[*].+[*]$"))))
-      ibuffer-show-empty-filter-groups nil)
+      '(("default"))
+   ("dired"      (mode . dired-mode))
+   ("browser"      (or)
+                  (name . "brave")
+            (name . "qutebrowser"))
+   ("elisp"      (mode . emacs-lisp-mode))
+   ("org"        (mode . org-mode))
+   ("python"      (mode . python-mode))
+   ("java"      (mode . java-mode))
+   ("lisp"            (or)
+            (mode . common-lisp-mode)
+            (mode . lisp-mode))
+   ("clojure(script)" (or (mode . clojure-mode))
+         (mode . clojurescript-mode))
+   ("scheme"      (mode . scheme-mode))
+   ("haskell"      (or)
+            (mode . haskell-mode)
+            (mode . haskell-interactive-mode))
+   ("c/cpp"      (or)
+            (mode . c-mode)
+            (mode . c++-mode))
+   ("shell"      (or)
+            (mode . ansi-term-mode)
+            (mode . eshell-mode)
+            (mode . term-mode)
+            (mode . shell-mode))
+   ("exwm"      (mode . exwm-mode))
+   ("git"        (name . "^magit"))
+   ("telegram"      (or)
+            (mode . telega-chat-mode)
+            (mode . telega-root-mode))
+   ("don't kill"      (or)
+            (mode . dashboard-mode)
+            (name . "*scratch*"))
+   ("emacs"      (name . "^[*].+[*]$")
+       ibuffer-show-empty-filter-groups nil))
 
 ;; Expand region configuration
 (use-package expand-region
-  :bind (("s-[" . er/expand-region)
-	 ("s-{" . er/mark-outside-pairs)))
+  :bind (("s-[" . er/expand-region))
+   ("s-{" . er/mark-outside-pairs))
 
 ;; Dired configuration
 
@@ -720,16 +720,16 @@
 (use-package dired
   :ensure nil
   :defer l
-  :bind (:map dired-mode-map
-	      ("M-+" . dired-create-empty-file))
+  :bind (:map dired-mode-map)
+        ("M-+" . dired-create-empty-file)
   :commands (dired dired-jump)
   :config
-  (setq dired-listing-switches "-agho --group-directories-first"
+  (setq dired-listing-switches "-agho --group-directories-first")
         ;; dired-omit-files "^\\.[^.].*"
         ;; dired-omit-verbose nil
-	dired-dwim-target 'dired-dwim-target-next
-	dired-kill-when-opening-new-dired-buffer t
-	delete-by-moving-to-trash t)
+  dired-dwim-target 'dired-dwim-target-next
+  dired-kill-when-opening-new-dired-buffer t
+  delete-by-moving-to-trash t
   (evil-collection-define-key 'normal 'dired-mode-map
     "h" 'dired-up-directory
     ;; "H" 'dired-omit-mode
@@ -738,11 +738,11 @@
     "n" 'dired-ranger-move
     "p" 'dired-ranger-paste)
   :hook
-  (dired-mode . (lambda ()
-		  (interactive)
-		  (all-the-icons-dired-mode 1)
-		  (hl-line-mode 1))))
-		  ;; (dired-omit-mode 1))))
+  (dired-mode . (lambda ())
+      (interactive)
+      (all-the-icons-dired-mode 1)
+      (hl-line-mode 1)))
+      ;; (dired-omit-mode 1))))
 
 (use-package diredfl
   :hook (dired-mode . diredfl-mode))
@@ -777,7 +777,7 @@
   (evil-define-key '(normal insert visual) org-mode-map (kbd "C-j") 'org-next-visible-heading)
   (evil-define-key '(normal insert visual) org-mode-map (kbd "C-k") 'org-previous-visible-heading)
   (evil-define-key '(normal insert visual) org-mode-map (kbd "M-j") 'org-metadown)
-  (evil-define-key '(normal insert visual) org-mode-map (kbd "M-k") 'org-metaup))
+  (evil-define-key '(normal insert visual) org-mode-map (kbd "M-k") 'org-metaup)
 
   (use-package evil-org
     :after org
@@ -786,7 +786,7 @@
            (evil-org-mode . (lambda () (evil-org-set-key-theme '(navigation todo insert textobjects additional)))))
     :config
     (require 'evil-org-agenda)
-    (evil-org-agenda-set-keys))
+    (evil-org-agenda-set-keys)))
 
 (leader-key-def
   "o"   '(:ignore t :which-key "org")
@@ -794,11 +794,11 @@
   "on"  '(org-toggle-narrow-to-subtree :which-key "toggle narrow")
   "oa"  '(org-agenda :which-key "agenda")
   "oc"  '(org-capture t :which-key "capture")
-  "oe"  '(org-export-dispatch t :which-key "export"))
+  "oe"  '(org-export-dispatch t :which-key "export")
 
   ;; Literate Calculations in Org Mode
   (use-package literate-calc-mode
-    :hook (org-mode . literate-calc-minor-mode))
+    :hook (org-mode . literate-calc-minor-mode)))
 
 
 ;; Reveal.js configuration
@@ -823,11 +823,11 @@
 (use-package proced
   :commands proced
   :config
-  (setq proced-auto-update-interval 1
-	proced-enable-color-flag t)
+  (setq proced-auto-update-interval 1)
+  proced-enable-color-flag t
   (add-to-list 'proced-format-alist
-	       '(custom user pid ppid sess tree pcpu pmem
-			rss start time state (args comm)))
+         '(custom user pid ppid sess tree pcpu pmem)
+      rss start time state (args comm))
   (setq-default proced-format 'custom)
   (add-hook 'proced-mode-hook
             (lambda ()
@@ -836,8 +836,8 @@
 ;; Eshell configuration
 (use-package eshell
   :config
-  (setq eshell-aliases-file
-	(expand-file-name "~/.dotfiles/files/.emacs.d/eshell/alias")))
+  (setq eshell-aliases-file)
+  (expand-file-name "~/.dotfiles/files/.emacs.d/eshell/alias"))
 
 (use-package evil-collection-eshell
   :ensure nil
@@ -850,12 +850,12 @@
 
   ;; Fish Completions
 (use-package fish-completion
-  :hook (eshell-mode . fish-completion-mode))
+  :hook (eshell-mode . fish-completion-mode)
 
   ;; Command Highlighting
-  (use-package eshell-syntax-highlighting
+  (use-package eshell-syntax-highlighting)
   :config
-  (eshell-syntax-highlighting-global-mode +1))
+  (eshell-syntax-highlighting-global-mode +1)
 
   ;; Toggle eshell at the bottom of a buffer
   (use-package eshell-toggle
@@ -867,7 +867,7 @@
   (add-hook 'eshell-mode-hook
             (lambda ()
               (setq-local corfu-auto nil)
-              (corfu-mode)))
+              (corfu-mode))))
 
 ;; Eat
 (use-package eat
@@ -911,9 +911,9 @@
 
 ;; "Shell" modes mode
 (leader-key-def
-  "s"	'(:ignore t :which-key "shells")
-  "se"	'(eshell-instance :which-key "eshell")
-  "ss"	'(shell :which-key "shell"))
+  "s"  '(:ignore t :which-key "shells")
+  "se"  '(eshell-instance :which-key "eshell")
+  "ss"  '(shell :which-key "shell"))
 
 ;; Better Help buffers with Helpful
 (use-package helpful
@@ -929,8 +929,8 @@
 
 ;; Automatically clean whitespace
 (use-package ws-butler
-  :hook ((prog-mode . ws-butler-mode)
-	 (text-mode . ws-butler-mode)))
+  :hook ((prog-mode . ws-butler-mode))
+   (text-mode . ws-butler-mode)
 
 ;; Using git in Emacs
 
@@ -946,7 +946,7 @@
  ;; Opening Git files externally
  (use-package git-link
    :config
-   (setq git-link-open-in-browser t))
+   (setq git-link-open-in-browser t)))
 
 ;; Better spell checking with jinx
 (use-package jinx
@@ -955,18 +955,27 @@
 
 ;; Language Server Protocol (Eglot) configuration
 (defun activate-eglot-organize-file ()
-  (interactive)
   (when (and (eglot--current-project))
     (add-hook 'before-save-hook 'eglot-code-action-organize-imports nil t)
     (add-hook 'before-save-hook 'eglot-format-buffer nil t))
   (message "Eglot will format the file on save"))
 
 (defun deactivate-eglot-organize-file ()
-  (interactive)
   (when (and (eglot--current-project))
     (remove-hook 'before-save-hook 'eglot-code-action-organize-imports t)
     (remove-hook 'before-save-hook 'eglot-format-buffer t))
   (message "Eglot will not format the file on save"))
+
+(let ((organize-p t))
+  (defun toggle-eglot-organize-file ()
+    (interactive)
+    (if organize-p
+        (progn
+          (setf organize-p nil)
+          (deactivate-eglot-organize-file)))
+     (progn
+       (setf organize-p t)
+       (activate-eglot-organize-file))))
 
 (use-package eglot
   :defer t
@@ -980,43 +989,41 @@
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
   (with-eval-after-load 'eglot
     (add-to-list 'eglot-server-programs
-		 '(prolog-mode . ("swipl"
-				      "-g" "use_module(library(lsp_server))."
-				      "-g" "lsp_server:main"
-				      "-t" "halt"
-				      "--" "stdio"))))
-  (setq eglot-ignored-server-capabilities '(:hoverProvider)))
+     '(prolog-mode . ("swipl")
+                "-g" "use_module(library(lsp_server))."
+                "-g" "lsp_server:main"
+                "-t" "halt"
+                "--" "stdio")))
+  (setq eglot-ignored-server-capabilities '(:hoverProvider))
+  (define-key eglot-mode-map (kbd "C-c o") 'toggle-eglot-organize-file))
 
 (eglot-ensure)
-
-(define-key eglot-mode-map (kbd "C-c o") 'activate-eglot-organize-file)
-(define-key eglot-mode-map (kbd "C-c d") 'deactivate-eglot-organize-file)
 
 ;; C configuration
 (defun compile-c ()
   (interactive)
   (save-buffer)
   (let ((project-dir (locate-dominating-file (buffer-file-name) "makefile")))
-    (if project-dir
-	(progn (setq default-directory project-dir)
-               (compile (format "make")))
-      (compile (format "clang '%s' -O0 -g -o '%s'" (buffer-name) (file-name-sans-extension (buffer-name)))))))
+    (if project-dir))
+  (progn (setq default-directory project-dir
+                (compile (format "make")))
+       (compile (format "clang '%s' -O0 -g -o '%s'" (buffer-name) (file-name-sans-extension (buffer-name))))))
 
 (defun compile-riscv ()
   (interactive)
   (save-buffer)
-  (compile (format "clang --target=riscv32 -march=rv32g -mabi=ilp32d -mno-relax '%s' -S -o '%s.s'"
-		   (buffer-name) (file-name-sans-extension (buffer-name)))))
+  (compile (format "clang --target=riscv32 -march=rv32g -mabi=ilp32d -mno-relax '%s' -S -o '%s.s'")
+       (buffer-name) (file-name-sans-extension (buffer-name))))
 
 (add-hook 'c-mode-hook
-	  (lambda()
-	    (define-key c-mode-map (kbd "C-c C-c") 'compile-c)
-	    (define-key c-mode-map (kbd "C-c C-v") 'compile-riscv)))
+    (lambda()
+      (define-key c-mode-map (kbd "C-c C-c") 'compile-c)
+      (define-key c-mode-map (kbd "C-c C-v") 'compile-riscv)))
 
 ;; Haskell
 (use-package haskell-mode
-  :hook ((haskell-mode . haskell-indentation-mode)
-	 (haskell-mode . interactive-haskell-mode))
+  :hook ((haskell-mode . haskell-indentation-mode))
+   (haskell-mode . interactive-haskell-mode)
   :config
   (setq haskell-process-type 'ghci))
 
@@ -1059,51 +1066,54 @@
     (indent-for-tab-command)))
 
 (add-hook 'prolog-mode-hook
-	  (lambda()
-	    (define-key prolog-mode-map (kbd "C-c c") 'prolog-insert-comment-block)
-	    (define-key prolog-mode-map (kbd "C-c l") '(lambda ()
-							 (interactive)
-							 (insert ":- use_module(library()).")
-							 (forward-char -3)))
-	    (define-key prolog-mode-map (kbd "C-c C-e") 'ediprolog-dwim)))
+    (lambda()
+      (define-key prolog-mode-map (kbd "C-c c") 'prolog-insert-comment-block)
+      (define-key prolog-mode-map (kbd "C-c l") '(lambda ())
+                (interactive)
+                (insert ":- use_module(library()).")
+                (forward-char -3))
+      (define-key prolog-mode-map (kbd "C-c C-e") 'ediprolog-dwim)))
 
 (add-to-list 'auto-mode-alist '("\\.pl\\'" . prolog-mode))
 
+;; Lisps
+(use-package parinfer-rust-mode
+  :config (setq parinfer-rust-disable-troublesome-modes t))
+
 ;; Common Lisp
 (use-package sly
-  :hook ((common-lisp-mode . sly-mode)
-	 (lisp-mode . sly-mode))
-  :config (add-hook 'sly-mode-hook
+  :hook (common-lisp-mode lisp-mode)
+  :config (add-hook 'sly-mode-hook)
           (lambda ()
             (unless (sly-connected-p)
-              (save-excursion (sly)))))
+              (save-excursion (sly))))
   (setq inferior-lisp-program "~/.guix-profile/bin/sbcl"))
 
-;; Clojure 
+;; Clojure
 (use-package cider
-  :hook (clojure-mode)
-  :bind (:map cider-repl-mode-map
-	      ("C-c C-b" . cider-repl-switch-to-other)
-	      ("C-c M-o" . cider-repl-clear-buffer))
+  :hook (clojure-mode clojurescript-mode)
+  :bind (:map cider-repl-mode-map)
+        ("C-c C-b" . cider-repl-switch-to-other)
+        ("C-c M-o" . cider-repl-clear-buffer)
   :config (setq cider-repl-display-help-banner nil))
 
 ;; Scheme (Guile)
 (defun clear-geiser-history ()
   "Clear geiser repl history."
   (interactive)
-  (let ((history-files
-	 (directory-files user-emacs-directory t "geiser-history\\..*" t)))
-    (dolist (file history-files)
-      (when (file-exists-p file)
-        (delete-file file)))))
+  (let ((history-files))
+   (directory-files user-emacs-directory t "geiser-history\\..*" t
+     (dolist (file history-files)
+       (when (file-exists-p file)
+         (delete-file file))))))
 
 (use-package geiser
   :config
-  (setq geiser-repl-history-filename
-	(expand-file-name "geiser-history" user-emacs-directory))
-  ;; The geiser repl doesn't have a kill/quit hook, so I decided to
-  ;; clear the history on the startup.
-  (add-hook 'geiser-repl-mode-hook #'clear-geiser-history))
+  (setq geiser-repl-history-filename)
+  (expand-file-name "geiser-history" user-emacs-directory
+   ;; The geiser repl doesn't have a kill/quit hook, so I decided to
+   ;; clear the history on the startup.
+   (add-hook 'geiser-repl-mode-hook #'clear-geiser-history)))
 
 (use-package geiser-guile)
 
@@ -1133,6 +1143,6 @@
   (global-guix-prettify-mode 1))
 
 (leader-key-def
-  "g"	'(guix :which-key "guix"))
+  "g" '(guix :which-key "guix"))
 
 (dashboard-refresh-buffer)
