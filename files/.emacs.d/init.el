@@ -869,8 +869,10 @@
               (corfu-mode)))
 
   ;; Eat
-  (use-package eat)
-  (add-hook 'eshell-first-time-mode-hook #'eat-eshell-mode)
+  (use-package eat
+    :config
+    (add-hook 'eshell-load-hook #'eat-eshell-mode)
+    (add-hook 'eshell-load-hook #'eat-eshell-visual-command-mode))
 
 ;; Stop Async Shell commands from split the window
 (add-to-list 'display-buffer-alist
@@ -912,6 +914,15 @@
   "s"	'(:ignore t :which-key "shells")
   "se"	'(eshell-instance :which-key "eshell")
   "ss"	'(shell :which-key "shell"))
+
+(defun vterm-instance ()
+  (interactive)
+  (vterm 'N))
+
+(use-package vterm
+  :config
+  (leader-key-def
+    "v" '(vterm-instance :which-key "vterm")))
 
 ;; Better Help buffers with Helpful
 (use-package helpful

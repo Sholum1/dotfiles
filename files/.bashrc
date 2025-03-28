@@ -26,7 +26,9 @@ alias grep='grep --color=auto'
 alias ip='ip -color=auto'
 alias docker='podman'
 alias 'docker-compose'='podman-compose'
-alias arruma_teclado='setxkbmap -layout br -variant abnt2 && xmodmap ~/.Xmodmap'
+alias arruma-teclado='setxkbmap -layout br -variant abnt2 && xmodmap ~/.Xmodmap'
+alias podman-socket='{ [ -S /tmp/podman.sock ] && pkill -f "podman system service.*unix:///tmp/podman.sock" && rm -f /tmp/podman.sock; }; sudo rm -f /var/run/docker.sock; podman system service --time=0 unix:///tmp/podman.sock & sleep 0.1 && sudo ln -sf /tmp/podman.sock /var/run/docker.sock'
+alias sdk-container='guix shell --container --emulate-fhs --network bash curl zip unzip which coreutils tar gzip grep sed nss-certs findutils gcc zlib libxext libxrender libxtst libxi just --share=$HOME --preserve='^HOME$' --preserve='^DISPLAY$'--preserve='^XAUTHORITY$' --expose=$XAUTHORITY -- bash --rcfile ~/.dotfiles/files/.sdkbashrc'
 alias | sed -E "s/^alias ([^=]+)='(.*)'$/alias \1 \2 \$*/g; s/'\\\''/'/g;" >~/.dotfiles/files/.emacs.d/eshell/alias
 
 # Eat integration
