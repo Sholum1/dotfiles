@@ -69,9 +69,19 @@
 ;; Emacs theme
 (load-theme 'Sholum t)
 
+(defvar sh/current-distro (or (and (eq system-type 'gnu/linux)
+                                   (file-exists-p "/etc/os-release")
+                                   (with-temp-buffer
+                                     (insert-file-contents "/etc/os-release")
+                                     (search-forward-regexp "^ID=\"?\\(.*\\)\"?$")
+                                     (intern (or (match-string 1)
+                                                 "unknown"))))
+                              'unknown))
+
 ;; Use-package configuration
-;; (require 'use-package-ensure)
-;; (setq use-package-always-ensure t)
+(require 'use-package-ensure)
+(if (not (eql sh/current-distro 'guix))
+    (setq use-package-always-ensure t))
 
 ;; Set up the visible bell
 (setq visible-bell t)
@@ -126,15 +136,15 @@
 
 (defun exwm-update-title ()
   (pcase exwm-class-name
-    ("Icecat"   (exwm-workspace-rename-buffer (format "%s" exwm-title)))
-    ("Chromium" (exwm-workspace-rename-buffer (format "%s" exwm-title)))
-    ("okular"   (exwm-workspace-rename-buffer (format "%s" exwm-title)))))
+    ("Icecat"        (exwm-workspace-rename-buffer (format "%s" exwm-title)))
+    ("Google-chrome" (exwm-workspace-rename-buffer (format "%s" exwm-title)))
+    ("okular"        (exwm-workspace-rename-buffer (format "%s" exwm-title)))))
 
 (use-package exwm
   :demand t
   :config
   ;; Set the default number of workspaces
-  (setq exwm-workspace-number 5)
+  (setq exwm-workspace-number 6)
 
   ;; When window "class" updates, use it to set the buffer name
   (add-hook 'exwm-update-class-hook #'exwm-update-class)
@@ -147,9 +157,8 @@
 
   ;; Set the screen resolution
   (require 'exwm-randr)
-  (setq exwm-randr-workspace-output-plist '(3 "HDMI-2" 4 "HDMI-2" 5 "HDMI-2"))
-  (start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output DP-1 --off --output HDMI-1 --off --output HDMI-2 --mode 1920x1080 --pos 1920x0 --rotate normal")
-  ;; (start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 1920x1080 --pos 0x0 --rotate normal --output DP-1 --off --output HDMI-1 --off --output HDMI-2 --mode 1920x1080 --pos 1920x0 --rotate normal")
+  (start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 1920x1080 --pos 1920x0 --rotate normal --output DP-1 --off --output HDMI-1 --off --output HDMI-2 --mode 1920x1080 --pos 0x0 --rotate normal")
+  (setq exwm-randr-workspace-monitor-plist '(3 "HDMI-2" 4 "HDMI-2" 5 "HDMI-2"))
 
   (exwm-randr-mode)
 
@@ -848,8 +857,8 @@
   (eshell 'N))
 
   ;; Fish Completions
-(use-package fish-completion
-  :hook (eshell-mode . fish-completion-mode))
+  (use-package fish-completion
+    :hook (eshell-mode . fish-completion-mode))
 
   ;; Command Highlighting
   (use-package eshell-syntax-highlighting
@@ -873,6 +882,18 @@
     :config
     (add-hook 'eshell-load-hook #'eat-eshell-mode)
     (add-hook 'eshell-load-hook #'eat-eshell-visual-command-mode))
+
+;; Term
+(defun ansi-term-instance ()
+  (interactive)
+  (ansi-term "bash"))
+
+;; "Shell" modes mode
+(leader-key-def
+  "s"  '(:ignore t          :which-key "shells")
+  "se" '(eshell-instance    :which-key "eshell")
+  "ss" '(shell              :which-key "shell")
+  "st" '(ansi-term-instance :which-key "term"))
 
 ;; Stop Async Shell commands from split the window
 (add-to-list 'display-buffer-alist
@@ -908,21 +929,6 @@
  '(("s-h" . history-pop)
    ("s-c" . close-all)
    ("s-t" . toggle-desktop-notification)))
-
-;; "Shell" modes mode
-(leader-key-def
-  "s"	'(:ignore t :which-key "shells")
-  "se"	'(eshell-instance :which-key "eshell")
-  "ss"	'(shell :which-key "shell"))
-
-(defun vterm-instance ()
-  (interactive)
-  (vterm 'N))
-
-(use-package vterm
-  :config
-  (leader-key-def
-    "v" '(vterm-instance :which-key "vterm")))
 
 ;; Better Help buffers with Helpful
 (use-package helpful
@@ -1131,29 +1137,30 @@
 (setq asm-comment-char 35)
 
 ;; Guix
-(use-package guix
-  :ensure nil ; Provided by Guix.
-  :config
-  ;; NOTE: This is the only way to avoid colisions between compiled '.go' files and
-  ;; `geiser' versions. The other option is to install geiser and guix under the
-  ;; same profile. This is problematic since the only `guix' binary you should be
-  ;; using is the one located at '~/.config/guix/current/bin/guix'.
-  (with-eval-after-load 'guix-repl
-    (setq guix-guile-program  '("guix" "repl")
-          guix-config-scheme-compiled-directory  nil
-          guix-repl-use-latest  nil
-          guix-repl-use-server  nil))
+(if (eql sh/current-distro 'guix)
+    (use-package guix
+      :ensure nil ; Provided by Guix.
+      :config
+      ;; NOTE: This is the only way to avoid colisions between compiled '.go' files and
+      ;; `geiser' versions. The other option is to install geiser and guix under the
+      ;; same profile. This is problematic since the only `guix' binary you should be
+      ;; using is the one located at '~/.config/guix/current/bin/guix'.
+      (with-eval-after-load 'guix-repl
+	(setq guix-guile-program  '("guix" "repl")
+              guix-config-scheme-compiled-directory  nil
+              guix-repl-use-latest  nil
+              guix-repl-use-server  nil))
 
-  (add-hook 'shell-mode-hook 'guix-build-log-minor-mode)
+      (add-hook 'shell-mode-hook 'guix-build-log-minor-mode)
 
-  ;; Show short git hash.
-  (setq guix-prettify-regexp
-        "/\\(?:store\\|log\\|nar\\(?:/\\(?:gzip\\|lzip\\|zstd\\)\\)?\\)/[0-9a-df-np-sv-z]\\{7\\}\\([0-9a-df-np-sv-z]\\{25\\}\\)")
-  :init
-  (global-guix-prettify-mode 1))
+      ;; Show short git hash.
+      (setq guix-prettify-regexp
+            "/\\(?:store\\|log\\|nar\\(?:/\\(?:gzip\\|lzip\\|zstd\\)\\)?\\)/[0-9a-df-np-sv-z]\\{7\\}\\([0-9a-df-np-sv-z]\\{25\\}\\)")
+      :init
+      (global-guix-prettify-mode 1))
 
-(leader-key-def
-  "g"	'(guix :which-key "guix"))
+  (leader-key-def
+    "g"	'(guix :which-key "guix")))
 
 
 ;; Zougue configuration

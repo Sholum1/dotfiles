@@ -1,9 +1,11 @@
 (use-modules (gnu)
 	     (gnu home)
-	     (gnu home services shells)
-	     (gnu home services dotfiles)
-	     (gnu packages gnupg)
-	     (gnu home services gnupg))
+	     (gnu home     services dotfiles)
+	     (gnu home     services desktop)
+	     (gnu home     services shells)
+	     (gnu home     services gnupg)
+	     (gnu home     services sound)
+	     (gnu packages gnupg))
 
 (home-environment
  (services (list (service home-dotfiles-service-type
