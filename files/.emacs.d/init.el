@@ -69,19 +69,13 @@
 ;; Emacs theme
 (load-theme 'Sholum t)
 
-(defvar sh/current-distro (or (and (eq system-type 'gnu/linux)
-                                   (file-exists-p "/etc/os-release")
-                                   (with-temp-buffer
-                                     (insert-file-contents "/etc/os-release")
-                                     (search-forward-regexp "^ID=\"?\\(.*\\)\"?$")
-                                     (intern (or (match-string 1)
-                                                 "unknown"))))
-                              'unknown))
+(defvar sh/personal? (equal (system-name) "Sholum"))
+(defvar sh/professional? (not sh/personal?))
 
 ;; Use-package configuration
-(require 'use-package-ensure)
-(if (not (eql sh/current-distro 'guix))
-    (setq use-package-always-ensure t))
+(when sh/professional?
+  (require 'use-package-ensure)
+  (setq use-package-always-ensure t))
 
 ;; Set up the visible bell
 (setq visible-bell t)
@@ -969,25 +963,25 @@
   :bind ([remap ispell-word] . jinx-correct))
 
 ;; Language Server Protocol (Eglot) configuration
-(defvar organize? t)
+(defvar sh/organize? t)
 
 (defun activate-eglot-organize-file ()
   (when (eglot--current-project)
     (add-hook 'before-save-hook 'eglot-code-action-organize-imports nil t)
     (add-hook 'before-save-hook 'eglot-format-buffer nil t)
-    (setq organize? t))
+    (setq sh/organize? t))
   (message "Eglot will format the file on save"))
 
 (defun deactivate-eglot-organize-file ()
   (when (eglot--current-project)
     (remove-hook 'before-save-hook 'eglot-code-action-organize-imports t)
     (remove-hook 'before-save-hook 'eglot-format-buffer t)
-    (setq organize? nil))
+    (setq sh/organize? nil))
   (message "Eglot will not format the file on save"))
 
 (defun toggle-eglot-organize-file ()
   (interactive)
-  (if organize?
+  (if sh/organize?
       (deactivate-eglot-organize-file)
     (activate-eglot-organize-file)))
 
@@ -1051,7 +1045,6 @@
 ;; Give emacs the ENV from Shell
 (use-package exec-path-from-shell
   :config
-  (exec-path-from-shell-copy-env "SDKMAN_DIR")
   (exec-path-from-shell-initialize))
 
 ;; Direnv
@@ -1137,7 +1130,7 @@
 (setq asm-comment-char 35)
 
 ;; Guix
-(if (eql sh/current-distro 'guix)
+(when sh/personal?
     (use-package guix
       :ensure nil ; Provided by Guix.
       :config
@@ -1146,10 +1139,10 @@
       ;; same profile. This is problematic since the only `guix' binary you should be
       ;; using is the one located at '~/.config/guix/current/bin/guix'.
       (with-eval-after-load 'guix-repl
-	(setq guix-guile-program  '("guix" "repl")
+	(setq guix-guile-program                     '("guix" "repl")
               guix-config-scheme-compiled-directory  nil
-              guix-repl-use-latest  nil
-              guix-repl-use-server  nil))
+              guix-repl-use-latest                   nil
+              guix-repl-use-server                   nil))
 
       (add-hook 'shell-mode-hook 'guix-build-log-minor-mode)
 
@@ -1159,26 +1152,27 @@
       :init
       (global-guix-prettify-mode 1))
 
-  (leader-key-def
-    "g"	'(guix :which-key "guix")))
+    (leader-key-def
+      "g" '(guix :which-key "guix")))
 
 
-;; Zougue configuration
-(use-package parinfer-rust-mode
-  :config
-  (setq parinfer-rust-disable-troublesome-modes t
-        parinfer-rust-preferred-mode "smart")
+(when sh/professional?
+  ;; Zougue configuration
+  (use-package parinfer-rust-mode
+    :config
+    (setq parinfer-rust-disable-troublesome-modes t
+          parinfer-rust-preferred-mode "smart")
 
-  (defun zouge-config ()
-    (when (string-prefix-p (expand-file-name "~/Zougue") (buffer-file-name))
-      (eglot-ensure)
-      (deactivate-eglot-organize-file)
-      (flycheck-mode -1)
-      ;; This is a hack and I hate it
-      (unless (bound-and-true-p parinfer-rust-mode)
-        (run-with-idle-timer 0.001 nil #'parinfer-rust-mode 1))))
+    (defun zouge-config ()
+      (when (string-prefix-p (expand-file-name "~/Zougue") (buffer-file-name))
+	(eglot-ensure)
+	(deactivate-eglot-organize-file)
+	(flycheck-mode -1)
+	;; This is a hack and I hate it
+	(unless (bound-and-true-p parinfer-rust-mode)
+          (run-with-idle-timer 0.001 nil #'parinfer-rust-mode 1))))
 
-  :hook ((clojure-mode . zouge-config)
-         (clojurescript-mode . zouge-config)))
+    :hook ((clojure-mode . zouge-config)
+           (clojurescript-mode . zouge-config))))
 
 (dashboard-refresh-buffer)

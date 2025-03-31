@@ -12,8 +12,9 @@
 (use-modules (gnu)
 	     (gnu    system   shadow)
 	     (gnu    system   accounts)
-	     (nongnu packages linux)
-	     (nongnu system   linux-initrd))
+	     (gnu    services virtualization)
+	     (nongnu system   linux-initrd)
+	     (nongnu packages linux))
 	     
 (use-service-modules containers cups desktop networking ssh xorg)
 
@@ -32,7 +33,7 @@
                   (comment "Wallysson")
                   (group "users")
                   (home-directory "/home/Sholum")
-                  (supplementary-groups '("wheel" "netdev" "audio" "video" "cgroup")))
+                  (supplementary-groups '("wheel" "netdev" "audio" "video" "cgroup" "kvm" "libvirt")))
                 %base-user-accounts))
 
   ;; Packages installed system-wide.  Users can also install packages
@@ -66,6 +67,7 @@
 				   (list (subid-range (name "Sholum"))))
 				  (subuids
 				   (list (subid-range (name "Sholum"))))))
+		 (service libvirt-service-type)
 		 (set-xorg-configuration
 		  (xorg-configuration (keyboard-layout keyboard-layout))))
 
@@ -106,7 +108,7 @@
                        (file-system
                          (mount-point "/home/Sholum/sata")
                          (device (uuid
-                                  "23cecf17-d21d-4d23-a6a3-98165c76d694"
+                                  "f8b62d74-b863-48fa-a048-374ed0a67e5a"
                                   'ext4))
                          (type "ext4")
 			 (flags '(no-atime)))
