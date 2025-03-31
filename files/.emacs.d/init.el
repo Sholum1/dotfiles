@@ -1155,7 +1155,6 @@
     (leader-key-def
       "g" '(guix :which-key "guix")))
 
-
 (when sh/professional?
   ;; Zougue configuration
   (use-package parinfer-rust-mode
@@ -1164,13 +1163,12 @@
           parinfer-rust-preferred-mode "smart")
 
     (defun zouge-config ()
-      (when (string-prefix-p (expand-file-name "~/Zougue") (buffer-file-name))
-	(eglot-ensure)
-	(deactivate-eglot-organize-file)
-	(flycheck-mode -1)
-	;; This is a hack and I hate it
-	(unless (bound-and-true-p parinfer-rust-mode)
-          (run-with-idle-timer 0.001 nil #'parinfer-rust-mode 1))))
+      (eglot-ensure)
+      (deactivate-eglot-organize-file)
+      (flycheck-mode -1)
+      ;; This is a hack and I hate it
+      (unless (bound-and-true-p parinfer-rust-mode)
+        (run-with-idle-timer 0.001 nil #'parinfer-rust-mode 1)))
 
     :hook ((clojure-mode . zouge-config)
            (clojurescript-mode . zouge-config))))
