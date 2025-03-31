@@ -305,6 +305,22 @@
 ;; Rebind C-u (since evil take it over)
 (global-set-key (kbd "C-M-u") 'universal-argument)
 
+;; Using git in Emacs
+
+  ;; Magit
+  (use-package magit
+    :custom
+    magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
+
+ ;; Make Magit more powerful with Forge
+  (use-package forge
+    :after magit)
+
+ ;; Opening Git files externally
+ (use-package git-link
+   :config
+   (setq git-link-open-in-browser t))
+
 ;; Evil Mode
 (defun evil-hook ()
   (dolist (mode '(custom-mode
@@ -940,22 +956,6 @@
 (use-package ws-butler
   :hook ((prog-mode . ws-butler-mode)
 	 (text-mode . ws-butler-mode)))
-
-;; Using git in Emacs
-
-  ;; Magit
-  (use-package magit
-    :custom
-    magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1)
-
- ;; Make Magit more powerful with Forge
-  (use-package forge
-    :after magit)
-
- ;; Opening Git files externally
- (use-package git-link
-   :config
-   (setq git-link-open-in-browser t))
 
 ;; Better spell checking with jinx
 (use-package jinx
