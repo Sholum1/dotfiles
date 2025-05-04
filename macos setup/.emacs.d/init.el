@@ -6,7 +6,6 @@
       native-comp-async-report-warnings-errors nil  ; Silence Compiler warnings
       package-install-upgrade-built-in t)           ; Upgrade the built-in packages
 
-(require 'iso-transl)
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
 (set-fringe-mode 15)        ; Give some breathing room
@@ -69,6 +68,10 @@
 ;; Emacs theme
 (load-theme 'Sholum t)
 
+;; Use-package configuration
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)
+
 ;; Set up the visible bell
 (setq visible-bell t)
 
@@ -109,151 +112,6 @@
       (display-line-numbers-mode)))
 
 (global-display-line-numbers-mode)
-
-;; EXWM configuration
-
-(defun exwm-init-hook ()
-  "Make workspace 0 be the one where we land at startup."
-  (exwm-workspace-switch-create 0))
-
-(defun exwm-update-class ()
-  (exwm-workspace-rename-buffer exwm-class-name))
-
-(defun exwm-update-title ()
-  (pcase exwm-class-name
-    ("Icecat"        (exwm-workspace-rename-buffer (format "%s" exwm-title)))
-    ("Google-chrome" (exwm-workspace-rename-buffer (format "%s" exwm-title)))
-    ("okular"        (exwm-workspace-rename-buffer (format "%s" exwm-title)))))
-
-(use-package exwm
-  :demand t
-  :config
-  ;; Set the default number of workspaces
-  (setq exwm-workspace-number 6)
-
-  ;; When window "class" updates, use it to set the buffer name
-  (add-hook 'exwm-update-class-hook #'exwm-update-class)
-
-  ;; When window title updates, use it to set the buffer name
-  (add-hook 'exwm-update-title-hook #'exwm-update-title)
-
-  ;; When EXWM starts up, do some extra configuration
-  (add-hook 'exwm-init-hook #'exwm-init-hook)
-
-  ;; Set the screen resolution
-  (require 'exwm-randr)
-  (start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 1920x1080 --pos 0x1080 --rotate normal --output DP-1 --off --output HDMI-1 --off --output HDMI-2 --mode 1920x1080 --pos 0x0 --rotate normal")
-  (setq exwm-randr-workspace-monitor-plist '(3 "HDMI-2" 4 "HDMI-2" 5 "HDMI-2"))
-
-  (exwm-randr-mode)
-
-  ;; Systemtray
-  (require 'exwm-systemtray)
-  (exwm-systemtray-mode)
-
-  ;; Set the wallpaper
-  (defun set-wallpaper ()
-    (interactive)
-    (start-process-shell-command "feh" nil "feh --bg-scale ~/Pictures/.Wallpaper.jpg"))
-  (set-wallpaper)
-
-  ;; These keys should always pass through to Emacs
-  (setq exwm-input-prefix-keys
-	'(?\C-x
-	  ?\C-u
-	  ?\C-h
-	  ?\C-w
-	  ?\M-x
-	  ?\M-`
-	  ?\M-&
-	  ?\M-:
-	  ?\C-\M-j ;; Buffer list
-	  ?\C-\ )) ;; Ctrl-Space
-
-  ;; Ctrl-Q will enable the next key to be sent directly
-  (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
-
-  ;; Set up global key bindings. These always work, no matter the input state!
-  ;; Keep in mind that changing this list after EXWM initialize has no effect.
-  (setq exwm-input-global-keys
-	`(
-	  ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
-	  ([?\s-r] . exwm-reset)
-
-	  ;; Launch applications via shell command
-	  ([?\s- ] . (lambda (command)
-		       (interactive (list (read-shell-command "$ ")))
-		       (start-process-shell-command command nil command)))
-
-	  ;; Switch workspace
-	  ([?\s-w] . exwm-workspace-switch)
-
-	  ;; 's-N': Switch to certain workspace with Super plus a number key (0-9)
-	  ,@(mapcar (lambda (i)
-		      `(,(kbd (format "s-%d" i)) .
-			(lambda()
-			  (interactive)
-			  (exwm-workspace-switch-create ,i))))
-		    (number-sequence 0 9))))
-
-  ;; Don't let ediff break EXWM, keep it in one frame
-  (setq ediff-diff-options "-w"
-	ediff-split-window-function 'split-window-horizontally
-	ediff-window-setup-function 'ediff-setup-windows-plain)
-
-  ;; Enable exwm
-  (exwm-enable))
-
-  ;; Since 'exwm-input-set-key' does not accept lists, here is a replacement
-  (defun exwm-key-input (i)
-    (mapcar (lambda (arg)
-              (let ((key (car arg))
-                    (fun (cdr arg)))
-		(exwm-input-set-key (kbd key) fun)))
-	    i))
-
-  ;; Launch apps that will run in the background
-  (defun run-in-background (command)
-    (let ((command-parts (split-string command "[ ]+")))
-      (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
-
-  (run-in-background "pasystray")
-  (run-in-background "nm-applet")
-  (run-in-background "dunst")
-  ;; (run-in-background "caffeine")
-  (run-in-background "redshift -O 3200 -P -r")
-  (run-in-background "xbanish")
-
-;; Desktop Environment configuration
-(use-package desktop-environment
-  :after exwm
-  :config
-  (exwm-key-input
-   '(("s-." . desktop-environment-volume-increment)
-     ("s->" . desktop-environment-volume-increment-slowly)
-     ("s-," . desktop-environment-volume-decrement)
-     ("s-<" . desktop-environment-volume-decrement-slowly)
-     ("s-p" . desktop-environment-brightness-increment)
-     ("s-P" . desktop-environment-brightness-increment-slowly)
-     ("s-o" . desktop-environment-brightness-decrement)
-     ("s-O" . desktop-environment-brightness-decrement-slowly)
-     ("s-m" . desktop-environment-toggle-music)
-     ("s-M" . desktop-environment-toggle-mute)
-     ("s-s" . desktop-environment-screenshot)
-     ("s-S" . desktop-environment-screenshot-part)))
-  ;; (setq desktop-environment-screenshot-command "spectacle -b -n"
-  ;; 	desktop-environment-screenshot-partial-command "spectacle -r -b -n")
-  :custom
-  (desktop-environment-brightness-small-increment "1%+")
-  (desktop-environment-brightness-small-decrement "1%-")
-  (desktop-environment-brightness-normal-increment "5%+")
-  (desktop-environment-brightness-normal-decrement "5%-")
-  (desktop-environment-volume-small-increment "1%+")
-  (desktop-environment-volume-small-decrement "1%-")
-  (desktop-environment-volume-normal-increment "5%+")
-  (desktop-environment-volume-normal-decrement "5%-")
-  :init
-  (desktop-environment-mode))
 
 ;; Dashboard configuration
 (use-package dashboard
@@ -337,7 +195,6 @@
   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
   (evil-set-initial-state 'messages-buffer-mode 'normal)
-  ;; (evil-set-initial-state 'exwm-mode 'emacs)
   (evil-set-initial-state 'dashboard-mode 'normal))
 
   ;; Evil collection
@@ -660,7 +517,6 @@
 (leader-key-def
   "b"   '(:ignore t :which-key "buffers")
   "bb"  '(consult-buffer :which-key "switch buffer")
-  "bw"  '(exwm-workspace-switch-to-buffer :which-key "switch workspace")
   "bn"  '(bury-buffer :which-key "bury buffer")
   "bm"  '(ibuffer :which-key "buffer menu")
   "bd"  '(:ignore t :which-key "kill buffer")
@@ -701,7 +557,6 @@
 			     (mode . eshell-mode)
 			     (mode . term-mode)
 			     (mode . shell-mode)))
-	 ("exwm"	    (mode . exwm-mode))
 	 ("git"		    (name . "^magit"))
 	 ("telegram"	    (or
 			     (mode . telega-chat-mode)
@@ -847,7 +702,7 @@
 (use-package eshell
   :config
   (setq eshell-aliases-file
-	(expand-file-name "~/.dotfiles/files/.emacs.d/eshell/alias")))
+	(expand-file-name "~/.emacs.d/eshell/alias")))
 
 (use-package evil-collection-eshell
   :ensure nil
@@ -906,31 +761,6 @@
   :defer t
   :config
   (setq tracking-frame-bahavior nil))
-
-;; Telegram
-(use-package telega
-  :commands (telega)
-  :defer t
-  :custom
-  (telega-notifications-mode 1))
-
-;; Dunst
-(defun history-pop ()
-  (interactive)
-  (start-process-shell-command "dunstctl" nil "dunstctl history-pop"))
-
-(defun close-all ()
-  (interactive)
-  (start-process-shell-command "dunstctl" nil "dunstctl close-all"))
-
-(defun toggle-desktop-notification ()
-  (interactive)
-  (start-process-shell-command "dunstctl" nil "dunstctl set-paused toggle"))
-
-(exwm-key-input
- '(("s-h" . history-pop)
-   ("s-c" . close-all)
-   ("s-t" . toggle-desktop-notification)))
 
 ;; Better Help buffers with Helpful
 (use-package helpful
@@ -1091,7 +921,7 @@
           (lambda ()
             (unless (sly-connected-p)
               (save-excursion (sly)))))
-  (setq inferior-lisp-program "~/.guix-profile/bin/sbcl"))
+  (setq inferior-lisp-program "~/opt/sbcl/bin/sbcl"))
 
 ;; Clojure
 (use-package cider
@@ -1123,30 +953,5 @@
 
 ;; ASM
 (setq asm-comment-char 35)
-
-;; Guix
-(use-package guix
-  :ensure nil ; Provided by Guix.
-  :config
-  ;; NOTE: This is the only way to avoid colisions between compiled '.go' files and
-  ;; `geiser' versions. The other option is to install geiser and guix under the
-  ;; same profile. This is problematic since the only `guix' binary you should be
-  ;; using is the one located at '~/.config/guix/current/bin/guix'.
-  (with-eval-after-load 'guix-repl
-    (setq guix-guile-program                     '("guix" "repl")
-          guix-config-scheme-compiled-directory  nil
-          guix-repl-use-latest                   nil
-          guix-repl-use-server                   nil))
-
-  (add-hook 'shell-mode-hook 'guix-build-log-minor-mode)
-
-  ;; Show short git hash.
-  (setq guix-prettify-regexp
-        "/\\(?:store\\|log\\|nar\\(?:/\\(?:gzip\\|lzip\\|zstd\\)\\)?\\)/[0-9a-df-np-sv-z]\\{7\\}\\([0-9a-df-np-sv-z]\\{25\\}\\)")
-  :init
-  (global-guix-prettify-mode 1))
-
-(leader-key-def
-  "g" '(guix :which-key "guix"))
 
 (dashboard-refresh-buffer)

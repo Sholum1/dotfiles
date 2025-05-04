@@ -1,0 +1,9 @@
+ #!/usr/bin/env xdg-open
+[Desktop Entry]
+Name=EXWM
+Comment=Emacs Window Manager
+Exec=sh /home/sholum/.emacs.d/exwm/start-exwm.sh
+TryExec=sh
+Type=Application
+X-SDDM-DesktopName=exwm
+DesktopNames=exwm

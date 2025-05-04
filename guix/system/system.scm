@@ -33,7 +33,9 @@
                   (comment "Wallysson")
                   (group "users")
                   (home-directory "/home/Sholum")
-                  (supplementary-groups '("wheel" "netdev" "audio" "video" "cgroup" "kvm" "libvirt")))
+                  (supplementary-groups '("wheel" "netdev" "audio"
+					  "video" "cgroup" "kvm"
+					  "libvirt" "dialout")))
                 %base-user-accounts))
 
   ;; Packages installed system-wide.  Users can also install packages

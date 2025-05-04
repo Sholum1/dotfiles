@@ -25,6 +25,7 @@ alias ll='ls -l'
 alias grep='grep --color=auto'
 alias ip='ip -color=auto'
 alias arruma-teclado='setxkbmap -layout br -variant abnt2 && xmodmap ~/.Xmodmap'
+alias zougue-vm='quickemu --vm ~/sata/VM/archlinux-latest.conf'
 alias | sed -E "s/^alias ([^=]+)='(.*)'$/alias \1 \2 \$*/g; s/'\\\''/'/g;" >~/.dotfiles/files/.emacs.d/eshell/alias
 
 # Eat integration

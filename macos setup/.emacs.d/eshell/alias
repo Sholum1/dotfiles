@@ -1,0 +1,6 @@
+alias arruma-teclado setxkbmap -layout br -variant abnt2 && xmodmap ~/.Xmodmap $*
+alias grep grep --color=auto $*
+alias ip ip -color=auto $*
+alias ll ls -l $*
+alias ls ls -p --color=auto $*
+alias zougue-vm quickemu --vm ~/sata/VM/archlinux-latest.conf $*

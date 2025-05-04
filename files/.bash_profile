@@ -13,3 +13,4 @@ eval "$(guix package --search-paths \
 
 # Prepend setuid programs.
 export PATH=/run/setuid-programs:$PATH
+export PATH="$HOME/.npm/.npm-global/bin:$PATH"
