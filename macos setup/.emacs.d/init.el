@@ -4,7 +4,13 @@
 (setq inhibit-startup-message t 		    ; Disable the startup message
       column-number-indicator-zero-based nil        ; Column number starts at one
       native-comp-async-report-warnings-errors nil  ; Silence Compiler warnings
-      package-install-upgrade-built-in t)           ; Upgrade the built-in packages
+      package-install-upgrade-built-in t            ; Upgrade the built-in packages
+      ;; Proper fullscreen handler
+      ns-use-native-fullscreen t
+      ns-auto-hide-menu-bar t
+      ;; Clipboard support
+      select-enable-clipboard t
+      save-interprogram-paste-before-kill t)
 
 (tool-bar-mode -1)          ; Disable the toolbar
 (tooltip-mode -1)           ; Disable tooltips
@@ -112,6 +118,11 @@
       (display-line-numbers-mode)))
 
 (global-display-line-numbers-mode)
+
+;; Give emacs the ENV from Shell
+(use-package exec-path-from-shell
+  :config
+  (exec-path-from-shell-initialize))
 
 ;; Dashboard configuration
 (use-package dashboard
@@ -866,11 +877,6 @@
 ;; Java
 (use-package eglot-java
   :hook (eglot-java-mode . java-mode))
-
-;; Give emacs the ENV from Shell
-(use-package exec-path-from-shell
-  :config
-  (exec-path-from-shell-initialize))
 
 ;; Direnv
 (use-package envrc
