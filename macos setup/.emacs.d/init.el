@@ -7,7 +7,6 @@
       package-install-upgrade-built-in t            ; Upgrade the built-in packages
       ;; Proper fullscreen handler
       ns-use-native-fullscreen t
-      ns-auto-hide-menu-bar t
       ;; Clipboard support
       select-enable-clipboard t
       save-interprogram-paste-before-kill t)
@@ -44,8 +43,8 @@
 ;; Set frame transparency and maximize windows by default
 (set-frame-parameter (selected-frame) 'alpha '(90 . 90))
 (add-to-list 'default-frame-alist '(alpha . (90 . 90)))
-(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
+(add-to-list 'default-frame-alist '(undecorated . t))
 
 ;; Keep transient cruft out of ~/.emacs.d/
 (setq user-emacs-directory "~/.cache/emacs/"
@@ -584,11 +583,9 @@
 	 ("s-{" . er/mark-outside-pairs)))
 
 ;; Dired configuration
+(setq insert-directory-program "gls" dired-use-ls-dired t)
+(setq dired-listing-switches "-al --group-directories-first")
 
-;; dired-omit-mode has some bug and I didn't find any solution
-
-;; (require 'dired-x)
-;; (autoload 'dired-omit-mode "dired-x")
 (use-package all-the-icons)
 (use-package all-the-icons-dired)
 (use-package dired-ranger
@@ -602,14 +599,14 @@
   :commands (dired dired-jump)
   :config
   (setq dired-listing-switches "-agho --group-directories-first"
-        ;; dired-omit-files "^\\.[^.].*"
-        ;; dired-omit-verbose nil
+        dired-omit-files "^\\.[^.].*"
+        dired-omit-verbose nil
 	dired-dwim-target 'dired-dwim-target-next
 	dired-kill-when-opening-new-dired-buffer t
 	delete-by-moving-to-trash t)
   (evil-collection-define-key 'normal 'dired-mode-map
     "h" 'dired-up-directory
-    ;; "H" 'dired-omit-mode
+    "H" 'dired-omit-mode
     "l" 'dired-find-file
     "y" 'dired-ranger-copy
     "n" 'dired-ranger-move
@@ -618,8 +615,8 @@
   (dired-mode . (lambda ()
 		  (interactive)
 		  (all-the-icons-dired-mode 1)
-		  (hl-line-mode 1))))
-		  ;; (dired-omit-mode 1))))
+		  (hl-line-mode 1)
+		  (dired-omit-mode 1))))
 
 (use-package diredfl
   :hook (dired-mode . diredfl-mode))
