@@ -7,6 +7,8 @@
       package-install-upgrade-built-in t            ; Upgrade the built-in packages
       ;; Proper fullscreen handler
       ns-use-native-fullscreen t
+      ;; Right option working as default
+      ns-right-alternate-modifier nil
       ;; Clipboard support
       select-enable-clipboard t
       save-interprogram-paste-before-kill t)
@@ -329,12 +331,6 @@
   (sp-pair "{" "}" :wrap "M-{")
   (sp-with-modes '(c-mode c-ts-mode c++-mode c++-ts-mode)
     (sp-local-pair  " " " " :wrap "M-SPC" :actions '(wrap))))
-
-;; Pinentry
-(use-package pinentry
-  :config
-  (setq epg-pinentry-mode 'loopback))
-(pinentry-start)
 
 ;; Rainbow delimiters
 (use-package rainbow-delimiters
@@ -797,14 +793,14 @@
 
 (defun activate-eglot-organize-file ()
   (when (eglot--current-project)
-    (add-hook 'before-save-hook 'eglot-code-action-organize-imports nil t)
+    (add-hook 'before-save-hook #'eglot-code-action-organize-imports nil t)
     (add-hook 'before-save-hook 'eglot-format-buffer nil t)
     (setq sh/organize? t)
     (message "Eglot will format the file on save")))
 
 (defun deactivate-eglot-organize-file ()
   (when (eglot--current-project)
-    (remove-hook 'before-save-hook 'eglot-code-action-organize-imports t)
+    (remove-hook 'before-save-hook #'eglot-code-action-organize-imports t)
     (remove-hook 'before-save-hook 'eglot-format-buffer t)
     (setq sh/organize? nil)
     (message "Eglot will not format the file on save")))
@@ -956,5 +952,24 @@
 
 ;; ASM
 (setq asm-comment-char 35)
+
+;; Typescript
+(use-package typescript-mode
+  :mode (("\\.ts\\'"  . typescript-mode)))
+
+;; Tide
+(use-package tide
+  :ensure t
+  :config
+  (defun setup-tide-mode ()
+    (interactive)
+    (tide-setup)
+    (flycheck-mode +1)
+    (setq flycheck-check-syntax-automatically '(save mode-enabled))
+    (eldoc-mode +1)
+    (tide-hl-identifier-mode +1))
+  :hook ((typescript-mode . tide-setup)
+         (typescript-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save)))
 
 (dashboard-refresh-buffer)
