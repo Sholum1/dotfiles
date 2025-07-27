@@ -202,7 +202,7 @@
 	ediff-window-setup-function 'ediff-setup-windows-plain)
 
   ;; Enable exwm
-  (exwm-enable))
+  (exwm-wm-mode))
 
   ;; Since 'exwm-input-set-key' does not accept lists, here is a replacement
   (defun exwm-key-input (i)
@@ -210,7 +210,8 @@
               (let ((key (car arg))
                     (fun (cdr arg)))
 		(exwm-input-set-key (kbd key) fun)))
-	    i))
+	    i)
+    (exwm-input--update-global-prefix-keys))
 
   ;; Launch apps that will run in the background
   (defun run-in-background (command)
@@ -220,7 +221,6 @@
   (run-in-background "pasystray")
   (run-in-background "nm-applet")
   (run-in-background "dunst")
-  ;; (run-in-background "caffeine")
   (run-in-background "redshift -O 3200 -P -r")
   (run-in-background "xbanish")
 
@@ -241,8 +241,7 @@
      ("s-M" . desktop-environment-toggle-mute)
      ("s-s" . desktop-environment-screenshot)
      ("s-S" . desktop-environment-screenshot-part)))
-  ;; (setq desktop-environment-screenshot-command "spectacle -b -n"
-  ;; 	desktop-environment-screenshot-partial-command "spectacle -r -b -n")
+  (setq desktop-environment-update-exwm-global-keys :global)
   :custom
   (desktop-environment-brightness-small-increment "1%+")
   (desktop-environment-brightness-small-decrement "1%-")
@@ -337,7 +336,6 @@
   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
   (evil-set-initial-state 'messages-buffer-mode 'normal)
-  ;; (evil-set-initial-state 'exwm-mode 'emacs)
   (evil-set-initial-state 'dashboard-mode 'normal))
 
   ;; Evil collection
@@ -986,7 +984,8 @@
          (clojure-mode       . eglot-ensure)
          (clojurescript-mode . eglot-ensure)
          (clojurec-mode      . eglot-ensure)
-	 (typescript-mode    . eglot-ensure)
+         (typescript-ts-mode . eglot-ensure)
+	 (tsx-ts-mode        . eglot-ensure)
          (eglot-managed-mode . activate-eglot-organize-file))
   :config
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
@@ -1148,5 +1147,9 @@
 
 (leader-key-def
   "g" '(guix :which-key "guix"))
+
+;; Typescript react
+(add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+(add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
 
 (dashboard-refresh-buffer)

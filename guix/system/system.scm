@@ -49,7 +49,6 @@
   ;; services, run 'guix system search KEYWORD' in a terminal.
   (services
    (append (list
-
                  ;; To configure OpenSSH, pass an 'openssh-configuration'
                  ;; record as a second argument to 'service' below.
                  (service openssh-service-type)
