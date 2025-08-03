@@ -948,19 +948,22 @@
   :bind ([remap ispell-word] . jinx-correct))
 
 ;; Language Server Protocol (Eglot) configuration
+(defun sh/organize-imports ()
+  (call-interactively 'eglot-code-action-organize-imports))
+
 (defvar sh/organize? nil)
 
 (defun activate-eglot-organize-file ()
   (when (eglot--current-project)
-    (add-hook 'before-save-hook 'eglot-code-action-organize-imports nil t)
-    (add-hook 'before-save-hook 'eglot-format-buffer nil t)
+    (add-hook 'before-save-hook #'sh/organize-imports nil t)
+    (add-hook 'before-save-hook #'eglot-format-buffer nil t)
     (setq sh/organize? t)
     (message "Eglot will format the file on save")))
 
 (defun deactivate-eglot-organize-file ()
   (when (eglot--current-project)
-    (remove-hook 'before-save-hook 'eglot-code-action-organize-imports t)
-    (remove-hook 'before-save-hook 'eglot-format-buffer t)
+    (remove-hook 'before-save-hook #'sh/organize-imports t)
+    (remove-hook 'before-save-hook #'eglot-format-buffer t)
     (setq sh/organize? nil)
     (message "Eglot will not format the file on save")))
 
