@@ -255,6 +255,7 @@
   (desktop-environment-mode))
 
 ;; Dashboard configuration
+(use-package all-the-icons)
 (use-package dashboard
   :demand t
   :config
@@ -716,12 +717,6 @@
 	 ("s-{" . er/mark-outside-pairs)))
 
 ;; Dired configuration
-
-;; dired-omit-mode has some bug and I didn't find any solution
-
-;; (require 'dired-x)
-;; (autoload 'dired-omit-mode "dired-x")
-(use-package all-the-icons)
 (use-package all-the-icons-dired)
 (use-package dired-ranger
   :defer t)
@@ -734,14 +729,14 @@
   :commands (dired dired-jump)
   :config
   (setq dired-listing-switches "-agho --group-directories-first"
-        ;; dired-omit-files "^\\.[^.].*"
-        ;; dired-omit-verbose nil
+        dired-omit-files "^\\.[^.].*"
+        dired-omit-verbose nil
 	dired-dwim-target 'dired-dwim-target-next
 	dired-kill-when-opening-new-dired-buffer t
 	delete-by-moving-to-trash t)
   (evil-collection-define-key 'normal 'dired-mode-map
     "h" 'dired-up-directory
-    ;; "H" 'dired-omit-mode
+    "H" 'dired-omit-mode
     "l" 'dired-find-file
     "y" 'dired-ranger-copy
     "n" 'dired-ranger-move
@@ -749,9 +744,9 @@
   :hook
   (dired-mode . (lambda ()
 		  (interactive)
+		  (hl-line-mode 1)
 		  (all-the-icons-dired-mode 1)
-		  (hl-line-mode 1))))
-		  ;; (dired-omit-mode 1))))
+		  (dired-omit-mode 1))))
 
 (use-package diredfl
   :hook (dired-mode . diredfl-mode))

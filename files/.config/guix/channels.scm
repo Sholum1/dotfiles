@@ -25,4 +25,12 @@
     "12540f593092e9a177eb8a974a57bb4892327752"
     (openpgp-fingerprint
      "3FFA 7335 973E 0A49 47FC  0A8C 38D5 96BE 07D3 34AB"))))
+ (channel
+  (name 'melpa)
+  (url "https://github.com/garrgravarr/guix-emacs")
+  (introduction
+   (make-channel-introduction
+    "d676ef5f94d2c1bd32f11f084d47dcb1a180fdd4"
+    (openpgp-fingerprint
+     "2DDF 9601 2828 6172 F10C  51A4 E80D 3600 684C 71BA"))))
  %default-channels)
