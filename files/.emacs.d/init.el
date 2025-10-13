@@ -142,7 +142,7 @@
 
   ;; Set the screen resolution
   (require 'exwm-randr)
-  (start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 1920x1080 --pos 0x1080 --rotate normal --output DP-1 --off --output HDMI-1 --off --output HDMI-2 --mode 1920x1080 --pos 0x0 --rotate normal")
+  (start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 1920x1080 --pos 2560x0 --rotate normal --output DP-1 --off --output HDMI-1 --off --output HDMI-2 --mode 2560x1080 --pos 0x0 --rotate normal")
   (setq exwm-randr-workspace-monitor-plist '(3 "HDMI-2" 4 "HDMI-2" 5 "HDMI-2"))
 
   (exwm-randr-mode)
@@ -700,6 +700,7 @@
 			     (mode . eshell-mode)
 			     (mode . term-mode)
 			     (mode . shell-mode)))
+	 ("prolog"          (mode . prolog-mode))
 	 ("exwm"	    (mode . exwm-mode))
 	 ("git"		    (name . "^magit"))
 	 ("telegram"	    (or
@@ -997,6 +998,7 @@
                                              "--" "port" :autoport))
                                  eglot-server-programs))
   (setq eglot-ignored-server-capabilities '(:hoverProvider))
+  (setq eglot-connect-timeout nil)
   (define-key eglot-mode-map (kbd "C-c o") 'toggle-eglot-organize-file))
 
 ;; C configuration

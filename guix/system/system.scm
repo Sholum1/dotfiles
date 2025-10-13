@@ -22,7 +22,7 @@
   (kernel linux)
   (initrd microcode-initrd)
   (firmware (list linux-firmware))
-  (locale "en_US.utf8")
+  (locale "en_US.UTF-8")
   (timezone "America/Sao_Paulo")
   (keyboard-layout (keyboard-layout "br" "abnt2"))
   (host-name "Sholum")
