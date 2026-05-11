@@ -551,6 +551,8 @@
 	 ("clojure(script)" (or (mode . clojure-mode)
 				(mode . clojurescript-mode)
 				(mode . clojurec-mode)))
+	 ("Typescript"      (or (mode . typescript-mode)
+				(mode . jtsx-tsx-mode)))
 	 ("scheme"	    (mode . scheme-mode))
 	 ("haskell"	    (or
 			     (mode . haskell-mode)
@@ -820,7 +822,7 @@
          (clojure-mode       . eglot-ensure)
          (clojurescript-mode . eglot-ensure)
          (clojurec-mode      . eglot-ensure)
-	 (typescript-mode    . eglot-ensure)
+	 ;; (typescript-mode    . eglot-ensure)
          (eglot-managed-mode . activate-eglot-organize-file))
   :config
   (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
@@ -834,6 +836,7 @@
                                              "--" "port" :autoport))
                                  eglot-server-programs))
   (setq eglot-ignored-server-capabilities '(:hoverProvider))
+  (setq eglot-connect-timeout nil)
   (define-key eglot-mode-map (kbd "C-c o") 'toggle-eglot-organize-file))
 
 ;; C configuration
@@ -957,19 +960,32 @@
 (use-package typescript-mode
   :mode (("\\.ts\\'"  . typescript-mode)))
 
+;; REACT
+(use-package jtsx
+  :mode (("\\.tsx\\'" . jtsx-tsx-mode)
+	 ("\\.jsx\\'" . jtsx-jsx-mode)))
+
+;; JSON
+(add-to-list 'auto-mode-alist '("\\.json\\'" . js-json-mode))
+(add-to-list 'auto-mode-alist '("\\.json.base\\'" . js-json-mode))
+
+(add-hook 'js-json-mode-hook
+          (lambda ()
+            (add-hook 'before-save-hook 'json-pretty-print-buffer nil 'local)))
+
 ;; Tide
 (use-package tide
-  :ensure t
   :config
   (defun setup-tide-mode ()
     (interactive)
     (tide-setup)
     (flycheck-mode +1)
     (setq flycheck-check-syntax-automatically '(save mode-enabled))
+    (setq tide-format-options '(:indentSize 2 :tabSize 2))
     (eldoc-mode +1)
     (tide-hl-identifier-mode +1))
-  :hook ((typescript-mode . tide-setup)
-         (typescript-mode . tide-hl-identifier-mode)
-         (before-save . tide-format-before-save)))
+  :hook ((typescript-mode . setup-tide-mode)
+	 (jtsx-tsx-mode   . setup-tide-mode)
+         (before-save     . tide-format-before-save)))
 
 (dashboard-refresh-buffer)
