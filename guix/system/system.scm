@@ -14,9 +14,10 @@
 	     (gnu    system   accounts)
 	     (gnu    services virtualization)
 	     (nongnu system   linux-initrd)
-	     (nongnu packages linux))
-	     
-(use-service-modules containers cups desktop networking ssh xorg)
+	     (nongnu packages linux)
+	     (srfi   srfi-1))
+
+(use-service-modules containers cups desktop networking sddm ssh xorg)
 
 (operating-system
   (kernel linux)
@@ -69,12 +70,17 @@
                                   (subuids
                                    (list (subid-range (name "Sholum"))))))
                  (service libvirt-service-type)
-                 (set-xorg-configuration
+                 (service startx-command-service-type
                   (xorg-configuration (keyboard-layout keyboard-layout))))
 
            ;; This is the default list of services we
-           ;; are appending to.
-           (modify-services %desktop-services
+           ;; are appending to, but with gdm-service-type removed
+           ;; since GDM 49 requires systemd's userdb, which is not
+           ;; available under Guix's elogind-based init.
+           (modify-services (remove (lambda (service)
+                                       (eq? (service-kind service)
+                                            gdm-service-type))
+                                     %desktop-services)
                             (guix-service-type config =>
                                                (guix-configuration
                                                 (inherit config)
