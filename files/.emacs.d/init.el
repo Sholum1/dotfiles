@@ -142,8 +142,8 @@
 
   ;; Set the screen resolution
   (require 'exwm-randr)
-  (start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 1920x1080 --pos 2560x0 --rotate normal --output DP-1 --off --output HDMI-1 --off --output HDMI-2 --mode 2560x1080 --pos 0x0 --rotate normal")
-  (setq exwm-randr-workspace-monitor-plist '(3 "HDMI-2" 4 "HDMI-2" 5 "HDMI-2"))
+  (start-process-shell-command "xrandr" nil "xrandr --output eDP-1 --primary --mode 1920x1080 --pos 2560x0 --rotate normal --output DP-1 --auto --output HDMI-1 --off --output HDMI-2 --mode 2560x1080 --pos 0x0 --rotate normal")
+  (setq exwm-randr-workspace-monitor-plist '(3 "DP-1" 4 "DP-1" 5 "DP-1"))
 
   (exwm-randr-mode)
 

@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (deftheme Sholum
   "Created 2020-10-21.")
 
